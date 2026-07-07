@@ -1,0 +1,16 @@
+version: "1.0"
+project_name: "<PROJECT_NAME>"
+
+tasks:
+  - task_id: "TASK-0001"
+    title: "<TASK_TITLE>"
+    status: "draft"
+    level: "B"
+    owner: "<OWNER>"
+    scope:
+      include: []
+      exclude: []
+    verification:
+      planned: []
+      completed: []
+    notes: ""

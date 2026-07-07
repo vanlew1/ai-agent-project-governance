@@ -1,0 +1,18 @@
+version: "1.0"
+project_name: "<PROJECT_NAME>"
+project_type: "<PROJECT_TYPE>"
+
+modules:
+  example_module:
+    owner: "<OWNER>"
+    purpose: "<WHAT_IT_DOES>"
+    inputs: []
+    outputs: []
+    risk_level: "medium"
+    writable_paths: []
+
+quality_gates:
+  max_function_lines: 80
+  max_file_lines_soft: 500
+  max_file_lines_hard: 800
+  require_module_registry_for_new_modules: true

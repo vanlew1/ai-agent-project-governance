@@ -1,0 +1,98 @@
+version: "1.0"
+
+entry:
+  - AGENTS.md
+  - agent_rules/00_rule_router.md
+  - agent_rules/01_task_classification.md
+
+task_types:
+  A_light:
+    description: "小范围修复、文案、注释、局部测试、已有函数轻量调整"
+    required_rules:
+      - agent_rules/task_cards/A_light_task.md
+      - agent_rules/06_data_safety_rules.md
+      - agent_rules/07_testing_rules.md
+      - agent_rules/11_project_specific_rules.md
+    github_research_required: false
+    full_trace_required: false
+    antigravity_audit_required: false
+
+  B_standard:
+    description: "已有模块内新增子能力、新增脚本、新增测试、局部流程调整、引入外部建议"
+    required_rules:
+      - agent_rules/task_cards/B_standard_task.md
+      - agent_rules/02_architecture_rules.md
+      - agent_rules/04_trace_and_index_rules.md
+      - agent_rules/05_external_advice_adaptation_rules.md
+      - agent_rules/06_data_safety_rules.md
+      - agent_rules/07_testing_rules.md
+      - agent_rules/11_project_specific_rules.md
+    conditional_rules:
+      open_source:
+        trigger: "当前仓库无现成实现、方案复杂、需要额外参考时"
+        rules:
+          - agent_rules/03_open_source_research_rules.md
+      ai_review:
+        trigger: "涉及自动分类、自动摘要、自动判断或批量初筛时"
+        rules:
+          - agent_rules/08_ai_auto_review_rules.md
+      code_quality:
+        trigger: "涉及新增代码、重构、文件拆分或复杂脚本时"
+        rules:
+          - agent_rules/12_code_quality_gates.md
+      versioning:
+        trigger: "涉及新增文件、规则变更、阶段性收口或版本发布时"
+        rules:
+          - docs/VERSIONING.md
+          - docs/TASK_REGISTRY.yaml
+          - docs/CHANGELOG.md
+      git_backup:
+        trigger: "涉及本地存档、提交、推送或 GitHub 上传时"
+        rules:
+          - agent_rules/13_git_and_backup_rules.md
+      cost_aware_testing:
+        trigger: "涉及大规模数据、批量任务、联网请求、回归测试或长时间任务时"
+        rules:
+          - agent_rules/14_cost_aware_testing_rules.md
+    github_research_required: conditional
+    full_trace_required: light
+    antigravity_audit_required: false
+
+  C_major:
+    description: "新增独立模块、重要架构调整、数据库结构调整、批量写入、发布前关键改动"
+    required_rules:
+      - agent_rules/task_cards/C_major_task.md
+      - agent_rules/02_architecture_rules.md
+      - agent_rules/03_open_source_research_rules.md
+      - agent_rules/04_trace_and_index_rules.md
+      - agent_rules/05_external_advice_adaptation_rules.md
+      - agent_rules/06_data_safety_rules.md
+      - agent_rules/07_testing_rules.md
+      - agent_rules/08_ai_auto_review_rules.md
+      - agent_rules/10_closure_rules.md
+      - agent_rules/11_project_specific_rules.md
+      - agent_rules/12_code_quality_gates.md
+      - docs/VERSIONING.md
+      - docs/TASK_REGISTRY.yaml
+      - docs/CHANGELOG.md
+      - agent_rules/13_git_and_backup_rules.md
+      - agent_rules/14_cost_aware_testing_rules.md
+    recommended_rules:
+      - agent_rules/09_antigravity_audit_rules.md
+    github_research_required: true
+    full_trace_required: true
+    antigravity_audit_required: recommended
+
+upgrade_triggers:
+  - production_environment
+  - database_write
+  - batch_overwrite
+  - cross_module_architecture
+  - irreversible_operation
+
+global_forbidden:
+  - "未经授权修改生产环境"
+  - "未经授权写入、删除或重建数据库"
+  - "审计任务中直接改代码"
+  - "未验证却宣称完成"
+  - "把自动输出直接当作正式结论"
