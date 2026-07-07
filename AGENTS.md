@@ -6,8 +6,9 @@
 
 1. 先读 `agent_rules/RULES_INDEX.yaml`。
 2. 再读 `agent_rules/00_rule_router.md`。
-3. 再读 `agent_rules/01_task_classification.md`，判断任务属于 A、B、C 哪一类。
-4. 仅按当前任务需要加载规则，避免无差别全量扫描。
+3. 如果项目方案尚未确认，先读 `agent_rules/15_plan_adaptation_rules.md`，判断处于 DISCOVERY、ADAPTATION 还是 EXECUTION。
+4. 再读 `agent_rules/01_task_classification.md`，判断任务属于 A、B、C 哪一类。
+5. 仅按当前任务需要加载规则，避免无差别全量扫描。
 
 ## 模板仓库边界
 
@@ -17,10 +18,11 @@
 
 ## 每次任务开始前必须明确
 
-1. 当前任务等级。
-2. 本次读取了哪些规则文件。
-3. 允许修改哪些目录或文件。
-4. 禁止修改哪些目录或文件。
+1. 当前项目模式：DISCOVERY、ADAPTATION 或 EXECUTION。
+2. 当前任务等级。
+3. 本次读取了哪些规则文件。
+4. 允许修改哪些目录或文件。
+5. 禁止修改哪些目录或文件。
 
 ## 全局红线
 
@@ -29,3 +31,4 @@
 - 审计任务默认只读。
 - 外部建议必须适配当前项目上下文，不得直接照抄。
 - 未经验证不得宣称任务完成。
+- 施工方案未确认前，不得把探索性对话固化为正式架构、模块表、任务表或变更日志。

@@ -1,16 +1,24 @@
 version: "1.0"
 project_name: "<PROJECT_NAME>"
 
-tasks:
-  - task_id: "TASK-0001"
-    title: "<TASK_TITLE>"
-    status: "draft"
-    level: "B"
-    owner: "<OWNER>"
-    scope:
-      include: []
-      exclude: []
-    verification:
-      planned: []
-      completed: []
-    notes: ""
+tasks: []
+
+task_example:
+  task_id: "TASK-0001"
+  title: "<TASK_TITLE>"
+  status: "draft"
+  level: "B"
+  owner: "<OWNER>"
+  scope:
+    include: []
+    exclude: []
+  verification:
+    planned:
+      automated_tests: []
+      repeatable_smoke: []
+      manual_one_off_checks: []
+    completed:
+      automated_tests: []
+      repeatable_smoke: []
+      manual_one_off_checks: []
+  notes: "Move this example into tasks only after EXECUTION is confirmed."

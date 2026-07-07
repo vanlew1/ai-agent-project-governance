@@ -4,6 +4,14 @@ A reusable governance template for AI-assisted software development with coding 
 
 This repository is a template layer, not a business project. It contains reusable governance rules, task routing, architecture placeholders, testing guidance, traceability scaffolding, and a beginner-friendly project bootstrap flow.
 
+It also includes a staged project bootstrap model so an AI assistant can work safely before the implementation plan is fully known:
+
+- `DISCOVERY`: clarify the project and keep notes as drafts
+- `ADAPTATION`: turn the emerging plan into project-specific rules, scope, module boundaries, and validation expectations
+- `EXECUTION`: implement only after the owner confirms the plan
+
+For external platforms, APIs, websites, login state, browser automation, production systems, or data import/export, the assistant must also confirm the access method and risk boundaries before writing real access code.
+
 ## Start Here
 
 If you are a beginner and want to use this template directly:
@@ -40,6 +48,7 @@ AI coding agents are powerful, but without project-level guardrails they can eas
 - task cards for different work levels
 - architecture and module registry templates
 - a framework fit guide for AI assistants to assess adoption suitability
+- discovery, open-question, bootstrap decision, and implementation-plan templates
 - project-specific governance placeholders
 - code quality gates
 - testing and validation rules
@@ -82,6 +91,11 @@ High-risk changes require stricter review, testing, and traceability.
 ## Files You Must Review In A New Project
 
 - `agent_rules/11_project_specific_rules.md`
+- `agent_rules/15_plan_adaptation_rules.md`
+- `docs/PROJECT_BRIEF_DRAFT.md`
+- `docs/OPEN_QUESTIONS.md`
+- `docs/BOOTSTRAP_DECISION.md`
+- `docs/IMPLEMENTATION_PLAN.md`
 - `docs/ARCHITECTURE.md`
 - `docs/MODULE_REGISTRY.yaml`
 - `docs/TASK_REGISTRY.yaml`
@@ -92,9 +106,24 @@ High-risk changes require stricter review, testing, and traceability.
 - `AGENTS.md`: the main entry point for agent behavior and governance rules
 - `agent_rules/RULES_INDEX.yaml`: the machine-readable routing and rule index
 - `agent_rules/task_cards/`: execution checklists for different task levels
+- `agent_rules/15_plan_adaptation_rules.md`: rules for DISCOVERY, ADAPTATION, and EXECUTION modes
 - `scripts/init_new_project.py`: the project bootstrap script
-- START_HERE.bat: the Windows beginner launcher
-- docs/FRAMEWORK_FIT_GUIDE.md: a guide for AI assistants to decide whether an existing project can safely adopt this framework
+- `START_HERE.bat`: the Windows beginner launcher
+- `docs/FRAMEWORK_FIT_GUIDE.md`: a guide for AI assistants to decide whether an existing project can safely adopt this framework
+
+## Project Bootstrap Modes
+
+New projects should not jump straight into formal architecture or code changes when the plan is still fuzzy.
+
+Use `DISCOVERY` when the project is still conversational. The assistant may update draft brief and open-question files, but must not finalize architecture, module registry, task registry, or changelog entries.
+
+Use `ADAPTATION` when the direction is clear enough to draft a project-specific implementation plan. The assistant may propose architecture, module, rule, and validation changes, but must wait for owner confirmation before execution.
+
+Use `EXECUTION` only after the implementation plan is confirmed. At that point, normal task classification, module boundaries, validation, and traceability rules apply.
+
+Execution confirmation is not just a casual "go ahead". The implementation plan must record who confirmed it, the date, the confirmed scope, allowed write scope, forbidden scope, accepted risks, and the first execution task.
+
+If a task involves an external platform, API, website, scraper, browser automation, webhook, cloud service, production system, data import, or data export, first complete an external access plan. Until the access method is confirmed, agents may only build interfaces, mocks, fixtures, or manual-input fallbacks.
 
 ## How To Use TASK / CHG / CHANGELOG
 
@@ -104,11 +133,14 @@ High-risk changes require stricter review, testing, and traceability.
 
 A practical workflow is: define `TASK`, implement and document `CHG`, then update `CHANGELOG` when the work is closed.
 
+Validation evidence should distinguish automated tests, repeatable smoke checks, and manual one-off checks. Do not present a one-time manual check as if it were repeatable automated validation.
+
 ## Git Local Backup Rules
 
 - Use local commits as the default way to preserve rollback points.
 - Stage only files related to the current task.
 - Recheck ignored files, sensitive content, and publication scope before pushing to a remote repository.
+- Keep generated outputs, raw data, private samples, local exports, and model outputs out of Git unless they are intentionally sanitized fixtures.
 
 ## Cost-Aware Testing Rules
 

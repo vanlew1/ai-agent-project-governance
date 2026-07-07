@@ -20,6 +20,16 @@ Before recommending adoption, the assistant should inspect these dimensions:
 
 ## Decision Process
 
+### Step 0: Identify The Project Mode
+
+Before judging framework fit, determine whether the project is in:
+
+- `DISCOVERY`: the idea is still being explored
+- `ADAPTATION`: the plan is being translated into project-specific governance
+- `EXECUTION`: the plan is confirmed and normal task execution can begin
+
+If the project is still in DISCOVERY, do not recommend broad rollout yet. Start by drafting `PROJECT_BRIEF_DRAFT.md`, `OPEN_QUESTIONS.md`, and `BOOTSTRAP_DECISION.md`.
+
 ### Step 1: Identify The Unit Of Change
 
 The assistant should first determine what a normal change looks like in this project.
@@ -124,8 +134,13 @@ Next step: complete ARCHITECTURE.md and MODULE_REGISTRY.yaml before expanding AI
 ## Relationship To Other Template Files
 
 - `docs/ARCHITECTURE.md`: primary architecture and fit-assessment source
+- `docs/PROJECT_BRIEF_DRAFT.md`: discovery-stage understanding before architecture is final
+- `docs/IMPLEMENTATION_PLAN.md`: adaptation-stage plan before execution begins
+- `docs/BOOTSTRAP_DECISION.md`: current DISCOVERY / ADAPTATION / EXECUTION decision
+- `docs/OPEN_QUESTIONS.md`: unresolved questions that may block execution
 - `docs/MODULE_REGISTRY.yaml`: module ownership and boundary source
 - `agent_rules/11_project_specific_rules.md`: local red lines and forbidden areas
+- `agent_rules/15_plan_adaptation_rules.md`: mode transition and plan-to-framework rules
 - `agent_rules/RULES_INDEX.yaml`: routing logic for governance behavior
 
 ## Practical Recommendation

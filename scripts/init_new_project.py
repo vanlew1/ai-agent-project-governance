@@ -140,11 +140,21 @@ def main() -> int:
     print(f"Project folder: {target_dir}")
     print()
     print("Review these files next:")
+    print(f"- {target_dir / 'docs' / 'PROJECT_BRIEF_DRAFT.md'}")
+    print(f"- {target_dir / 'docs' / 'OPEN_QUESTIONS.md'}")
+    print(f"- {target_dir / 'docs' / 'BOOTSTRAP_DECISION.md'}")
+    print(f"- {target_dir / 'docs' / 'IMPLEMENTATION_PLAN.md'}")
     print(f"- {target_dir / 'agent_rules' / '11_project_specific_rules.md'}")
+    print(f"- {target_dir / 'agent_rules' / '15_plan_adaptation_rules.md'}")
     print(f"- {target_dir / 'docs' / 'ARCHITECTURE.md'}")
     print(f"- {target_dir / 'docs' / 'MODULE_REGISTRY.yaml'}")
     print(f"- {target_dir / 'docs' / 'TASK_REGISTRY.yaml'}")
     print(f"- {target_dir / 'docs' / 'CHANGELOG.md'}")
+    print()
+    print("Before EXECUTION, make sure:")
+    print("- docs/IMPLEMENTATION_PLAN.md has every execution confirmation field filled in.")
+    print("- External platform/API/data access method is confirmed or explicitly out of scope.")
+    print("- Generated outputs, raw data, and private samples stay out of Git unless sanitized.")
     return 0
 
 

@@ -5,6 +5,44 @@ entry:
   - agent_rules/00_rule_router.md
   - agent_rules/01_task_classification.md
 
+project_modes:
+  DISCOVERY:
+    description: "需求、目标、边界或施工方案尚不明确；只允许探索、提问、草稿和未知项整理"
+    required_rules:
+      - agent_rules/15_plan_adaptation_rules.md
+    primary_files:
+      - docs/PROJECT_BRIEF_DRAFT.md
+      - docs/OPEN_QUESTIONS.md
+      - docs/BOOTSTRAP_DECISION.md
+    protected_from_final_updates:
+      - docs/ARCHITECTURE.md
+      - docs/MODULE_REGISTRY.yaml
+      - docs/TASK_REGISTRY.yaml
+      - docs/CHANGELOG.md
+
+  ADAPTATION:
+    description: "方向基本明确；把方案转成项目专属规则、架构草案、模块边界和验证计划"
+    required_rules:
+      - agent_rules/15_plan_adaptation_rules.md
+      - agent_rules/02_architecture_rules.md
+      - agent_rules/11_project_specific_rules.md
+    primary_files:
+      - docs/IMPLEMENTATION_PLAN.md
+      - docs/ARCHITECTURE.md
+      - docs/MODULE_REGISTRY.yaml
+      - agent_rules/11_project_specific_rules.md
+    confirmation_required_before:
+      - code_changes
+      - task_registry_finalization
+      - changelog_updates
+      - real_external_access
+
+  EXECUTION:
+    description: "施工方案已确认；按任务等级、模块边界和验证规则执行开发"
+    required_rules:
+      - agent_rules/15_plan_adaptation_rules.md
+      - agent_rules/01_task_classification.md
+
 task_types:
   A_light:
     description: "小范围修复、文案、注释、局部测试、已有函数轻量调整"
@@ -54,6 +92,16 @@ task_types:
         trigger: "涉及大规模数据、批量任务、联网请求、回归测试或长时间任务时"
         rules:
           - agent_rules/14_cost_aware_testing_rules.md
+      plan_adaptation:
+        trigger: "施工方案尚未确认、需求仍在逐步沟通、或需要把方案转成项目专属框架时"
+        rules:
+          - agent_rules/15_plan_adaptation_rules.md
+      external_access:
+        trigger: "涉及外部平台、网站、API、登录态、爬虫、浏览器自动化、Webhook、云服务、生产系统、数据导入或数据导出时"
+        rules:
+          - agent_rules/15_plan_adaptation_rules.md
+          - agent_rules/06_data_safety_rules.md
+          - agent_rules/14_cost_aware_testing_rules.md
     github_research_required: conditional
     full_trace_required: light
     antigravity_audit_required: false
@@ -77,6 +125,7 @@ task_types:
       - docs/CHANGELOG.md
       - agent_rules/13_git_and_backup_rules.md
       - agent_rules/14_cost_aware_testing_rules.md
+      - agent_rules/15_plan_adaptation_rules.md
     recommended_rules:
       - agent_rules/09_antigravity_audit_rules.md
     github_research_required: true
@@ -89,6 +138,9 @@ upgrade_triggers:
   - batch_overwrite
   - cross_module_architecture
   - irreversible_operation
+  - unconfirmed_implementation_plan
+  - unclear_project_boundaries
+  - unconfirmed_external_access_method
 
 global_forbidden:
   - "未经授权修改生产环境"
@@ -96,3 +148,5 @@ global_forbidden:
   - "审计任务中直接改代码"
   - "未验证却宣称完成"
   - "把自动输出直接当作正式结论"
+  - "施工方案未确认前固化正式架构、模块表、任务表或变更日志"
+  - "外部平台或数据接入方式未确认前实现真实访问代码"

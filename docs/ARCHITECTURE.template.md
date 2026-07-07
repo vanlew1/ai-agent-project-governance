@@ -26,10 +26,21 @@ The goal is to help an AI assistant answer four questions:
 Use this section first. It gives the AI assistant a quick decision surface.
 
 - Recommended adoption mode: `full` / `partial` / `pilot_only` / `not_recommended`
+- Current project mode: `DISCOVERY` / `ADAPTATION` / `EXECUTION`
 - Why this recommendation was chosen:
 - Safe starting scope for adoption:
 - High-risk areas that must stay guarded:
 - Required human approvals before broad rollout:
+
+## Project Definition Stage
+
+Before treating this architecture as final, check whether the project is still in DISCOVERY, ADAPTATION, or EXECUTION.
+
+- DISCOVERY: goals and boundaries are still forming. Keep architecture notes draft-only and update `PROJECT_BRIEF_DRAFT.md` plus `OPEN_QUESTIONS.md`.
+- ADAPTATION: the direction is mostly clear. Convert the emerging plan into this architecture file, the module registry, project-specific rules, and validation expectations, but keep changes pending confirmation.
+- EXECUTION: the owner has confirmed the implementation plan. This architecture can be used as an execution reference.
+
+Do not use this file as an execution authority until `BOOTSTRAP_DECISION.md` and `IMPLEMENTATION_PLAN.md` show that EXECUTION is confirmed.
 
 ## Project Shape Checklist
 

@@ -10,6 +10,11 @@ dist/
 build/
 cache/
 logs/
+outputs/
+exports/
+data/raw/
+data/private/
+data/samples/private/
 *.log
 .DS_Store
 Thumbs.db
