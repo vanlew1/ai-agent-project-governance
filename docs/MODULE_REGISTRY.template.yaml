@@ -5,11 +5,17 @@ project_type: "<PROJECT_TYPE>"
 modules:
   example_module:
     owner: "<OWNER>"
+    layer: "domain"
     purpose: "<WHAT_IT_DOES>"
     inputs: []
     outputs: []
-    risk_level: "medium"
+    depends_on: []
     writable_paths: []
+    sensitive_paths: []
+    external_systems: []
+    public_entrypoints: []
+    risk_level: "medium"
+    adoption_scope: "safe_initial_scope"
 
 quality_gates:
   max_function_lines: 80

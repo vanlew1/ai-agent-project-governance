@@ -39,6 +39,7 @@ AI coding agents are powerful, but without project-level guardrails they can eas
 - `agent_rules/RULES_INDEX.yaml` for machine-readable rule loading
 - task cards for different work levels
 - architecture and module registry templates
+- a framework fit guide for AI assistants to assess adoption suitability
 - project-specific governance placeholders
 - code quality gates
 - testing and validation rules
@@ -92,7 +93,8 @@ High-risk changes require stricter review, testing, and traceability.
 - `agent_rules/RULES_INDEX.yaml`: the machine-readable routing and rule index
 - `agent_rules/task_cards/`: execution checklists for different task levels
 - `scripts/init_new_project.py`: the project bootstrap script
-- `START_HERE.bat`: the Windows beginner launcher
+- START_HERE.bat: the Windows beginner launcher
+- docs/FRAMEWORK_FIT_GUIDE.md: a guide for AI assistants to decide whether an existing project can safely adopt this framework
 
 ## How To Use TASK / CHG / CHANGELOG
 
