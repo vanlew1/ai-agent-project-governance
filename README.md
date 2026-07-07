@@ -2,7 +2,20 @@
 
 A reusable governance template for AI-assisted software development with coding agents such as Codex, Antigravity-style auditors, and other autonomous development agents.
 
-This repository is a template layer, not a business project. It contains reusable governance rules, task routing, architecture placeholders, testing guidance, and traceability scaffolding for projects that use AI coding agents.
+This repository is a template layer, not a business project. It contains reusable governance rules, task routing, architecture placeholders, testing guidance, traceability scaffolding, and a beginner-friendly project bootstrap flow.
+
+## Start Here
+
+If you are a beginner and want to use this template directly:
+
+1. Download or clone this repository.
+2. On Windows, double-click `START_HERE.bat`.
+3. Fill in the prompts for your new project.
+4. Open the generated project folder and continue from there.
+
+If you prefer the command line, run:
+
+`python scripts/init_new_project.py`
 
 ## What This Template Is For
 
@@ -33,6 +46,7 @@ AI coding agents are powerful, but without project-level guardrails they can eas
 - Git local backup rules
 - cost-aware testing rules
 - read-only audit workflow support
+- a beginner-friendly initialization script and Windows launcher
 
 ## Who This Is For
 
@@ -58,12 +72,13 @@ High-risk changes require stricter review, testing, and traceability.
 
 ## How To Use It
 
-1. Copy `AGENTS.md`, `agent_rules/`, `docs/`, and `scripts/` into the root of a new project.
-2. Run `python scripts/init_new_project.py`, or manually rename all `*.template.*` files to their final names.
-3. Fill in the project-specific files and placeholders.
-4. Keep task records, change records, and version history inside the new project repository.
+1. Download or copy this template.
+2. Run `START_HERE.bat` or `python scripts/init_new_project.py`.
+3. The setup flow creates a new project folder and renames all template files automatically.
+4. The setup flow fills basic placeholders for your new project.
+5. Complete the remaining project-specific details in the generated files.
 
-## Files You Must Fill In For A New Project
+## Files You Must Review In A New Project
 
 - `agent_rules/11_project_specific_rules.md`
 - `docs/ARCHITECTURE.md`
@@ -76,6 +91,8 @@ High-risk changes require stricter review, testing, and traceability.
 - `AGENTS.md`: the main entry point for agent behavior and governance rules
 - `agent_rules/RULES_INDEX.yaml`: the machine-readable routing and rule index
 - `agent_rules/task_cards/`: execution checklists for different task levels
+- `scripts/init_new_project.py`: the project bootstrap script
+- `START_HERE.bat`: the Windows beginner launcher
 
 ## How To Use TASK / CHG / CHANGELOG
 
