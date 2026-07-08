@@ -5,6 +5,17 @@ entry:
   - agent_rules/00_rule_router.md
   - agent_rules/01_task_classification.md
 
+lightweight_entry:
+  description: "A 类轻量任务默认入口，优先节省上下文"
+  files:
+    - docs/AGENT_QUICK_CONTEXT.md
+    - README.md
+  defaults:
+    - "先用 rg 定位相关代码或测试，再读取局部片段"
+    - "不默认读取完整架构、实施计划或规则索引"
+    - "测试输出仅保留摘要"
+    - "施工报告控制在修改文件、核心改动、测试结果、风险四项"
+
 project_modes:
   DISCOVERY:
     description: "需求、目标、边界或施工方案尚不明确；只允许探索、提问、草稿和未知项整理"
@@ -47,6 +58,7 @@ task_types:
   A_light:
     description: "小范围修复、文案、注释、局部测试、已有函数轻量调整"
     required_rules:
+      - docs/AGENT_QUICK_CONTEXT.md
       - agent_rules/task_cards/A_light_task.md
       - agent_rules/06_data_safety_rules.md
       - agent_rules/07_testing_rules.md

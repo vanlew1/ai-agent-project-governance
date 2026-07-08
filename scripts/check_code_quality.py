@@ -33,6 +33,7 @@ def check_required_files() -> list[str]:
     required_groups = [
         ["AGENTS.md"],
         ["agent_rules/RULES_INDEX.yaml"],
+        ["docs/AGENT_QUICK_CONTEXT.md", "docs/AGENT_QUICK_CONTEXT.template.md"],
         ["agent_rules/11_project_specific_rules.md", "agent_rules/11_project_specific_rules.template.md"],
         ["docs/MODULE_REGISTRY.yaml", "docs/MODULE_REGISTRY.template.yaml"],
         ["docs/TASK_REGISTRY.yaml", "docs/TASK_REGISTRY.template.yaml"],

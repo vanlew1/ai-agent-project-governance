@@ -141,6 +141,7 @@ def main() -> int:
     print()
     print("Review these files next:")
     print(f"- {target_dir / 'docs' / 'PROJECT_BRIEF_DRAFT.md'}")
+    print(f"- {target_dir / 'docs' / 'AGENT_QUICK_CONTEXT.md'}")
     print(f"- {target_dir / 'docs' / 'OPEN_QUESTIONS.md'}")
     print(f"- {target_dir / 'docs' / 'BOOTSTRAP_DECISION.md'}")
     print(f"- {target_dir / 'docs' / 'IMPLEMENTATION_PLAN.md'}")

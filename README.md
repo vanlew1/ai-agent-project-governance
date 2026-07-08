@@ -2,6 +2,8 @@
 
 A reusable governance template for AI-assisted software development with coding agents such as Codex, Antigravity-style auditors, and other autonomous development agents.
 
+AI 辅助软件开发治理模板，适用于 Codex、Antigravity 风格审计代理和其他自动化开发代理。
+
 This repository is a template layer, not a business project. It contains reusable governance rules, task routing, architecture placeholders, testing guidance, traceability scaffolding, and a beginner-friendly project bootstrap flow.
 
 It also includes a staged project bootstrap model so an AI assistant can work safely before the implementation plan is fully known:
@@ -42,6 +44,7 @@ AI coding agents are powerful, but without project-level guardrails they can eas
 ## What It Includes
 
 - task classification for light, standard, and major work
+- a lightweight quick-context entry for small tasks
 - rule routing so agents only read the rules they need
 - `AGENTS.md` as the main entry point
 - `agent_rules/RULES_INDEX.yaml` for machine-readable rule loading
@@ -80,6 +83,12 @@ Small tasks stay small.
 Major tasks get stronger safeguards.  
 High-risk changes require stricter review, testing, and traceability.
 
+## Lightweight Task Flow
+
+Small tasks should not pay the full governance cost up front.
+
+Use the lightweight entry when the work is limited to copy tweaks, small bug fixes, local tests, or narrow edits inside existing functions. In that mode, the agent should start from `docs/AGENT_QUICK_CONTEXT.md`, `README.md`, and directly relevant code or tests, then escalate to the full rule tree only if the task touches architecture, data safety, Git publication, external access, or broader project boundaries.
+
 ## How To Use It
 
 1. Download or copy this template.
@@ -90,6 +99,7 @@ High-risk changes require stricter review, testing, and traceability.
 
 ## Files You Must Review In A New Project
 
+- `docs/AGENT_QUICK_CONTEXT.md`
 - `agent_rules/11_project_specific_rules.md`
 - `agent_rules/15_plan_adaptation_rules.md`
 - `docs/PROJECT_BRIEF_DRAFT.md`
