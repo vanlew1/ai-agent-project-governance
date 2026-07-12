@@ -7,15 +7,37 @@
 ## 基础顺序
 
 1. 读取 `RULES_INDEX.yaml`。
-2. 如果项目方案未确认，读取 `15_plan_adaptation_rules.md`，先判断 DISCOVERY、ADAPTATION 或 EXECUTION。
-3. 读取 `01_task_classification.md`。
-4. 根据任务等级与触发条件，补充读取对应规则。
-5. 如任务涉及项目专有边界，补充读取 `11_project_specific_rules.md`。
+2. 如任务明显涉及真实外部 API、正式数据写入、网络/VPN 状态、用户授权、不可逆或高成本操作，先执行 Gate 0 人工前置条件检查；缺确认时停止扩展读取，只请求缺失确认。
+3. 如果项目方案未确认，读取 `15_plan_adaptation_rules.md`，先判断 DISCOVERY、ADAPTATION 或 EXECUTION。
+4. 读取 `01_task_classification.md`。
+5. 根据任务等级与触发条件，补充读取对应规则。
+6. 如任务涉及项目专有边界，补充读取 `11_project_specific_rules.md`。
 
 ## 路由原则
 
+- 轻量入口仅适用于 A 类低风险任务，不得替代完整治理规则。
 - 默认按 B 类任务处理不明确需求。
 - 未确认施工方案前，默认按 DISCOVERY 或 ADAPTATION 处理，不得直接进入 EXECUTION。
 - 风险可以升级，修改范围不得自动扩大。
 - 只在触发条件满足时加载附加规则。
 - 规则读取应服务于当前任务，而不是覆盖式浏览仓库。
+- 成本、联网、正式写入或大规模验证任务必须遵守 `14_cost_aware_testing_rules.md` 的 Token-Efficient Execution Contract。
+
+## 轻量入口升级规则
+
+如任务涉及以下任一项，必须退出轻量入口并回到完整规则树：
+
+- 新增文件或模块
+- 修改架构边界
+- 修改数据库、缓存、production、正式证据库
+- 修改 Git 存档、push、remote
+- 调用 LLM API、外部 API、联网抓取
+- 全量扫描、大规模测试、成本较高任务
+- 安全、隐私、密钥、token
+- 跨模块改动
+- 任务范围不明确
+
+触发升级后应立即停止轻量施工，并输出以下提示：
+
+当前任务已触发升级条件，不能继续按轻量入口执行。
+需要切换到完整治理规则树后重新确认任务类型、允许范围、禁止范围和验证方式。

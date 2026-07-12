@@ -4,7 +4,25 @@
 
 ## 轻量任务快车道
 
-适用于 A 类任务：文案、注释、小 bug、局部测试、已有函数轻量调整。
+轻量入口仅适用于 A 类任务：
+
+- 文案修改
+- README 小修
+- 注释修改
+- 局部格式修复
+- 已有函数内极小调整
+- 单个测试补充
+- 不涉及数据写入、不涉及架构、不涉及 Git、不涉及外部 API 的小任务
+
+A 类任务必须同时满足：
+
+1. 修改范围小。
+2. 影响面清晰。
+3. 可快速验证。
+4. 不涉及生产数据或敏感资产。
+5. 不引入新模块。
+6. 不改变架构边界。
+7. 不触发 Git、外部 API、LLM API、联网抓取或大规模测试。
 
 A 类任务默认只读：
 
@@ -14,13 +32,31 @@ A 类任务默认只读：
 
 A 类任务默认不要读取完整 `docs/ARCHITECTURE.md`、`docs/IMPLEMENTATION_PLAN.md`、`docs/PROJECT_BRIEF_DRAFT.md`、`agent_rules/RULES_INDEX.yaml`，除非任务涉及架构边界、模块登记、数据安全、发布、Git 操作、外部接入或用户明确要求。
 
+如任务涉及以下任一项，必须退出轻量入口并读取完整规则树：
+
+- 新增文件或模块
+- 修改架构边界
+- 修改数据库、缓存、production、正式证据库
+- 修改 Git 存档、push、remote
+- 调用 LLM API、外部 API、联网抓取
+- 全量扫描、大规模测试、成本较高任务
+- 安全、隐私、密钥、token
+- 跨模块改动
+- 任务范围不明确
+
+如果 Agent 在执行轻量任务过程中发现任一升级条件，应立即停止继续施工，并输出：
+
+当前任务已触发升级条件，不能继续按轻量入口执行。
+需要切换到完整治理规则树后重新确认任务类型、允许范围、禁止范围和验证方式。
+
 ## 使用原则
 
 1. 先读 `agent_rules/RULES_INDEX.yaml`。
 2. 再读 `agent_rules/00_rule_router.md`。
-3. 如果项目方案尚未确认，先读 `agent_rules/15_plan_adaptation_rules.md`，判断处于 DISCOVERY、ADAPTATION 还是 EXECUTION。
-4. 再读 `agent_rules/01_task_classification.md`，判断任务属于 A、B、C 哪一类。
-5. 仅按当前任务需要加载规则，避免无差别全量扫描。
+3. 涉及真实外部 API、正式数据写入、网络/VPN 状态、用户授权、不可逆或高成本操作时，先按 `agent_rules/14_cost_aware_testing_rules.md` 执行 Gate 0。
+4. 如果项目方案尚未确认，先读 `agent_rules/15_plan_adaptation_rules.md`，判断处于 DISCOVERY、ADAPTATION 还是 EXECUTION。
+5. 再读 `agent_rules/01_task_classification.md`，判断任务属于 A、B、C 哪一类。
+6. 仅按当前任务需要加载规则，避免无差别全量扫描。
 
 ## 模板仓库边界
 
@@ -30,7 +66,17 @@ A 类任务默认不要读取完整 `docs/ARCHITECTURE.md`、`docs/IMPLEMENTATIO
 
 ## 每次任务开始前必须明确
 
-轻量任务只需简短说明任务等级、修改范围和验证方式。B/C 类任务需要明确：
+轻量任务仍需保留最低报告闭环：
+
+- 修改文件
+- 核心改动
+- 测试/检查
+- 未触碰范围
+- 是否需要升级
+
+`docs/AGENT_QUICK_CONTEXT.md` 只是轻量入口，不是规则真源；如与 `AGENTS.md`、`agent_rules/RULES_INDEX.yaml` 或 `agent_rules/` 下完整规则冲突，以完整规则树为准。
+
+B/C 类任务需要明确：
 
 1. 当前项目模式：DISCOVERY、ADAPTATION 或 EXECUTION。
 2. 当前任务等级。

@@ -6,7 +6,7 @@ entry:
   - agent_rules/01_task_classification.md
 
 lightweight_entry:
-  description: "A 类轻量任务默认入口，优先节省上下文"
+  description: "A 类低风险任务的轻量入口，优先节省上下文，但不能替代完整治理规则"
   files:
     - docs/AGENT_QUICK_CONTEXT.md
     - README.md
@@ -14,8 +14,40 @@ lightweight_entry:
     - "先用 rg 定位相关代码或测试，再读取局部片段"
     - "不默认读取完整架构、实施计划或规则索引"
     - "测试输出仅保留摘要"
-    - "施工报告控制在修改文件、核心改动、测试结果、风险四项"
+    - "轻量任务最低报告包含修改文件、核心改动、测试/检查、未触碰范围、是否需要升级"
+  allowed_scope:
+    - "文案修改、README 小修、注释修改、局部格式修复"
+    - "已有函数内极小调整"
+    - "单个测试补充"
+    - "不涉及数据写入、架构、Git、外部 API 的小任务"
+  escalation_required_when:
+    - "新增文件或模块"
+    - "修改架构边界"
+    - "修改数据库、缓存、production、正式证据库"
+    - "修改 Git 存档、push、remote"
+    - "调用 LLM API、外部 API、联网抓取"
+    - "全量扫描、大规模测试、成本较高任务"
+    - "安全、隐私、密钥、token"
+    - "跨模块改动"
+    - "任务范围不明确"
+  authority: "如与 AGENTS.md、RULES_INDEX.yaml 或 agent_rules/ 下完整规则冲突，以完整规则树为准"
 
+
+execution_contracts:
+  token_efficient_execution:
+    source: agent_rules/14_cost_aware_testing_rules.md
+    description: "低 token、低重复、人工前置门优先的执行合同；不得削弱数据安全、测试质量或验收门禁"
+    read_when:
+      - "真实外部 API、联网抓取、connectivity probe、登录态、云服务或网络/VPN/TUN 条件"
+      - "正式数据库、production、evidence、pool、migration 或高成本写入"
+      - "大规模数据、批量任务、回归测试、长时间任务或高成本验证"
+      - "任务被阻塞、需要 checkpoint、需要复用其他分支资产或避免重复建设"
+    gate_0_required_before:
+      - code_changes
+      - full_rule_tree_read
+      - full_regression
+      - database_backup
+      - live_external_request
 project_modes:
   DISCOVERY:
     description: "需求、目标、边界或施工方案尚不明确；只允许探索、提问、草稿和未知项整理"
@@ -153,6 +185,12 @@ upgrade_triggers:
   - unconfirmed_implementation_plan
   - unclear_project_boundaries
   - unconfirmed_external_access_method
+  - new_file_or_module
+  - git_archive_or_remote_change
+  - llm_api_or_external_api
+  - web_fetch_or_scraping
+  - large_scale_testing
+  - security_or_secret_scope
 
 global_forbidden:
   - "未经授权修改生产环境"
