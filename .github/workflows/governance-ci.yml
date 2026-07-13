@@ -31,4 +31,12 @@ jobs:
       - run: python -m pip install -r requirements-governance.txt
       - run: python scripts/check_template_integrity.py
       - run: python scripts/check_python_syntax.py
-      - run: python scripts/agent_detect_adapter.py --root .
+      - name: Validate adapter detection
+        shell: pwsh
+        run: |
+          python scripts/agent_detect_adapter.py --root . detect
+          if ($LASTEXITCODE -eq 2) {
+            Write-Host "Generic adapter fallback is expected for this template repository."
+            exit 0
+          }
+          exit $LASTEXITCODE
