@@ -1,0 +1,8 @@
+schema_version: "1.0"
+project_mode: EXECUTION
+architecture_status: confirmed
+implementation_plan_status: confirmed
+repository_root: .
+adapter: generic
+high_risk_paths: [data/production/**]
+default_forbidden_operations: [production_write, destructive_delete]

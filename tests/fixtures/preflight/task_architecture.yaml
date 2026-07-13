@@ -1,0 +1,10 @@
+schema_version: "1.0"
+task_id: TASK-P1-ARCH
+title: Architecture update for local governance module
+description: Add an architecture module with an explicit local path.
+requested_by: owner
+requested_at: "2026-07-13T09:00:00+08:00"
+hints:
+  likely_paths: [governance/]
+  external_access: false
+  production_write: false

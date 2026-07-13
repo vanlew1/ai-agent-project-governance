@@ -1,0 +1,8 @@
+schema_version: "1.0"
+project_mode: DISCOVERY
+architecture_status: draft
+implementation_plan_status: draft
+repository_root: .
+adapter: generic
+high_risk_paths: []
+default_forbidden_operations: []

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/governance_module_registry.schema.json",
+  "title": "Governance Runtime Module Registry",
+  "description": "The framework-owned module ownership and dependency registry.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry", "modules"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "registry": {"const": "governance_runtime"},
+    "modules": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][a-z0-9_]*$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["owner", "layer", "purpose", "status", "paths", "depends_on", "must_not_depend_on", "risk_level", "phase", "public_entrypoints", "notes"],
+          "properties": {
+            "owner": {"type": "string", "minLength": 1},
+            "layer": {"type": "string", "minLength": 1},
+            "purpose": {"type": "string", "minLength": 1},
+            "status": {"enum": ["existing", "phase_0_baseline", "planned", "deferred"]},
+            "paths": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "depends_on": {"type": "array", "items": {"type": "string"}},
+            "must_not_depend_on": {"type": "array", "items": {"type": "string"}},
+            "risk_level": {"enum": ["low", "medium", "high"]},
+            "phase": {"type": "string", "minLength": 1},
+            "public_entrypoints": {"type": "array", "items": {"type": "string"}},
+            "notes": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/project_state.schema.json",
+  "title": "Governance Project State",
+  "description": "Durable project facts independent of a single task conversation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project_mode", "architecture_status", "implementation_plan_status", "repository_root", "adapter", "high_risk_paths", "default_forbidden_operations"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "project_mode": {"enum": ["DISCOVERY", "ADAPTATION", "EXECUTION"]},
+    "architecture_status": {"enum": ["draft", "confirmed", "superseded"]},
+    "implementation_plan_status": {"enum": ["draft", "ready_for_confirmation", "confirmed", "superseded"]},
+    "repository_root": {"type": "string", "minLength": 1},
+    "adapter": {"type": "string", "minLength": 1},
+    "high_risk_paths": {"type": "array", "items": {"type": "string"}},
+    "default_forbidden_operations": {"type": "array", "items": {"type": "string"}}
+  }
+}

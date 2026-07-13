@@ -1,0 +1,10 @@
+schema_version: "1.0"
+task_id: TASK-P1-SAFE
+title: Fix documentation typo
+description: Fix a local documentation typo and its focused test.
+requested_by: owner
+requested_at: "2026-07-13T09:00:00+08:00"
+hints:
+  likely_paths: [docs/guide.md]
+  external_access: false
+  production_write: false

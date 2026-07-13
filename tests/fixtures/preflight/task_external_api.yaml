@@ -1,0 +1,10 @@
+schema_version: "1.0"
+task_id: TASK-P1-API
+title: Call a real API
+description: Make a real API request.
+requested_by: owner
+requested_at: "2026-07-13T09:00:00+08:00"
+hints:
+  likely_paths: [governance/client.py]
+  external_access: true
+  production_write: false

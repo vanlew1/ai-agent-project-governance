@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/rules_index.schema.json",
+  "title": "Governance Rules Index",
+  "description": "Structural validation for the current rule registry plus optional runtime baseline metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "entry",
+    "lightweight_entry",
+    "execution_contracts",
+    "project_modes",
+    "task_types",
+    "upgrade_triggers",
+    "global_forbidden"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entry": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "lightweight_entry": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "execution_contracts": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "project_modes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "task_types": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "upgrade_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "global_forbidden": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "governance_runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "architecture",
+        "module_registry",
+        "schema_directory",
+        "runtime_behavior_enabled"
+      ],
+      "properties": {
+        "phase": {
+          "enum": [
+            "PHASE_0_BASELINE",
+            "PHASE_1_MINIMUM_RUNTIME",
+            "PHASE_2_STATE_AND_GUARDS"
+          ]
+        },
+        "architecture": {
+          "const": "docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md"
+        },
+        "module_registry": {
+          "const": "docs/GOVERNANCE_RUNTIME_MODULE_REGISTRY.yaml"
+        },
+        "schema_directory": {
+          "const": "schemas"
+        },
+        "runtime_behavior_enabled": {
+          "type": "boolean"
+        },
+        "preflight_enabled": {
+          "type": "boolean"
+        },
+        "state_persistence_enabled": {
+          "type": "boolean"
+        },
+        "scope_enforcement_enabled": {
+          "type": "boolean"
+        },
+        "test_execution_enabled": {
+          "type": "boolean"
+        },
+        "automatic_closure_enabled": {
+          "type": "boolean"
+        },
+        "approval_freshness_enabled": {
+          "type": "boolean"
+        },
+        "forbidden_operation_guard_enabled": {
+          "type": "boolean"
+        },
+        "test_planning_enabled": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

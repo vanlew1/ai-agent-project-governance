@@ -200,3 +200,18 @@ global_forbidden:
   - "把自动输出直接当作正式结论"
   - "施工方案未确认前固化正式架构、模块表、任务表或变更日志"
   - "外部平台或数据接入方式未确认前实现真实访问代码"
+
+governance_runtime:
+  phase: PHASE_2_STATE_AND_GUARDS
+  architecture: docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md
+  module_registry: docs/GOVERNANCE_RUNTIME_MODULE_REGISTRY.yaml
+  schema_directory: schemas
+  runtime_behavior_enabled: true
+  preflight_enabled: true
+  state_persistence_enabled: true
+  scope_enforcement_enabled: true
+  approval_freshness_enabled: true
+  forbidden_operation_guard_enabled: true
+  test_planning_enabled: false
+  test_execution_enabled: false
+  automatic_closure_enabled: false

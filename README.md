@@ -172,3 +172,11 @@ This repository does not include:
 ## Notes
 
 This repository is intended to stay generic. It is a reusable governance template and should not contain project-specific business logic, project data, or private operational configuration.
+
+## Governance Runtime Roadmap
+
+This repository has started building a deterministic governance runtime. P0 establishes only the target architecture and Schema baseline; existing tasks remain governed by `AGENTS.md` and the current rule tree. Preflight, state reuse, scope guards, and automatic closure are not enabled. See [the formal runtime architecture](docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md).
+
+P1 adds a deterministic read-only Preflight CLI: `python scripts/agent_preflight.py --task-file task.yaml --project-state-file state.yaml`. It generates a contract only; state persistence, scope enforcement, test execution, and automatic closure remain disabled.
+
+P2 flow: preflight ? state init ? activate ? approve (only for risk) ? guard check. Guards do not run tests or repair files; approvals are not a secret store; `.agent_state/` is ignored. A dirty worktree may correctly return WARN.

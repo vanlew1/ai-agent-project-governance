@@ -1,0 +1,8 @@
+schema_version: "1.0"
+project_mode: ADAPTATION
+architecture_status: draft
+implementation_plan_status: ready_for_confirmation
+repository_root: .
+adapter: generic
+high_risk_paths: []
+default_forbidden_operations: []

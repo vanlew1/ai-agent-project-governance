@@ -1,0 +1,135 @@
+schema_version: "1.0"
+registry: governance_runtime
+modules:
+  rule_layer:
+    owner: framework_maintainers
+    layer: entry_and_rule
+    purpose: Human- and Agent-readable governance principles and routing.
+    status: existing
+    paths: [agent_rules/, AGENTS.md]
+    depends_on: []
+    must_not_depend_on: [governance/]
+    risk_level: medium
+    phase: pre_existing
+    public_entrypoints: [AGENTS.md, agent_rules/RULES_INDEX.yaml]
+    notes: Existing routing remains authoritative while runtime behavior is disabled.
+  architecture_baseline:
+    owner: framework_maintainers
+    layer: architecture
+    purpose: Fixed target design for the framework runtime, isolated from downstream templates.
+    status: phase_0_baseline
+    paths: [docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md, docs/ADR/]
+    depends_on: [rule_layer]
+    must_not_depend_on: [governance/preflight/, governance/state/]
+    risk_level: high
+    phase: P0
+    public_entrypoints: [docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md]
+    notes: Target architecture only; it does not enable runtime behavior.
+  schema_contracts:
+    owner: framework_maintainers
+    layer: policy_contracts
+    purpose: Canonical structural constraints for runtime data and runtime metadata.
+    status: phase_0_baseline
+    paths: [schemas/]
+    depends_on: [architecture_baseline]
+    must_not_depend_on: [governance/preflight/, governance/verification/]
+    risk_level: high
+    phase: P0
+    public_entrypoints: [schemas/task_contract.schema.json, schemas/rules_index.schema.json]
+    notes: Schema fields are the unique structural truth for later runtime work.
+  runtime_models:
+    owner: framework_maintainers
+    layer: runtime_models
+    purpose: Package namespace reserved for future typed runtime models.
+    status: existing
+    paths: [governance/__init__.py, governance/models/]
+    depends_on: [schema_contracts]
+    must_not_depend_on: [filesystem, network, governance/preflight/]
+    risk_level: low
+    phase: P1
+    public_entrypoints: [governance.models]
+    notes: P1 provides immutable schema-aligned models only.
+  validation_tooling:
+    owner: framework_maintainers
+    layer: verification
+    purpose: Deterministic architecture and schema baseline validation.
+    status: phase_0_baseline
+    paths: [scripts/validate_governance.py, requirements-governance.txt]
+    depends_on: [schema_contracts, architecture_baseline]
+    must_not_depend_on: [network, governance/preflight/, .agent_state/]
+    risk_level: medium
+    phase: P0
+    public_entrypoints: [scripts/validate_governance.py]
+    notes: Read-only validator; it does not execute governance behavior.
+  test_baseline:
+    owner: framework_maintainers
+    layer: verification
+    purpose: Unit and integration checks for P0 contracts and baseline references.
+    status: phase_0_baseline
+    paths: [tests/unit/, tests/integration/]
+    depends_on: [schema_contracts, validation_tooling]
+    must_not_depend_on: [network, production_data]
+    risk_level: medium
+    phase: P0
+    public_entrypoints: [tests/unit/test_schema_contracts.py, tests/integration/test_architecture_baseline.py]
+    notes: Tests cover baseline behavior only and must not imply a working Preflight.
+  preflight_runtime:
+    owner: framework_maintainers
+    layer: preflight_and_contract
+    purpose: Resolve task mode, risks, approvals, scope, tests, and contracts.
+    status: existing
+    paths: [governance/preflight/, scripts/agent_preflight.py]
+    depends_on: [schema_contracts, runtime_models, rule_layer]
+    must_not_depend_on: [governance/verification/]
+    risk_level: high
+    phase: P1
+    public_entrypoints: [scripts/agent_preflight.py]
+    notes: Deterministic Preflight only; no persistence, guard, runner, or closure.
+  state_store:
+    owner: framework_maintainers
+    layer: state_and_approval
+    purpose: Persist project state, active tasks, approvals, and freshness decisions.
+    status: existing
+    paths: [governance/state/, .agent_state/]
+    depends_on: [schema_contracts, runtime_models]
+    must_not_depend_on: [external_models]
+    risk_level: high
+    phase: P2
+    public_entrypoints: [scripts/agent_state.py, scripts/agent_approve.py]
+    notes: Explicit local state and approval freshness; state is ignored by Git.
+  scope_guard:
+    owner: framework_maintainers
+    layer: work_support
+    purpose: Enforce permitted path and operation boundaries.
+    status: existing
+    paths: [governance/guards/, scripts/agent_guard.py]
+    depends_on: [schema_contracts, preflight_runtime]
+    must_not_depend_on: [project_business_code]
+    risk_level: high
+    phase: P2
+    public_entrypoints: [scripts/agent_guard.py]
+    notes: Read-only scope, approval, and forbidden-operation checks; no automatic remediation.
+  future_verification:
+    owner: framework_maintainers
+    layer: verification_and_closure
+    purpose: Plan/run tests, normalize results, and evaluate closure.
+    status: planned
+    paths: [governance/verification/]
+    depends_on: [runtime_models, future_guards]
+    must_not_depend_on: [policy_runner]
+    risk_level: medium
+    phase: P3
+    public_entrypoints: []
+    notes: Test planner, command runner, and closure evaluator are deferred.
+  future_adapters:
+    owner: framework_maintainers
+    layer: adapters
+    purpose: Supply stack-specific defaults without business-policy inference.
+    status: deferred
+    paths: [governance/adapters/]
+    depends_on: [runtime_models]
+    must_not_depend_on: [project_business_code]
+    risk_level: medium
+    phase: P4
+    public_entrypoints: []
+    notes: No adapters are implemented in P0.
