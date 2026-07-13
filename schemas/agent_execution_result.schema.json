@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/agent_execution_result.schema.json",
+  "title": "Agent Execution Result",
+  "description": "P6 structured local orchestration evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "orchestration_id",
+    "task_id",
+    "subtask_id",
+    "role",
+    "status",
+    "contract_digest",
+    "head_sha",
+    "branch",
+    "workspace_fingerprint",
+    "changed_files",
+    "commands_run",
+    "test_results",
+    "artifacts",
+    "risks",
+    "unresolved_items",
+    "started_at",
+    "finished_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "orchestration_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "head_sha": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "workspace_fingerprint": {
+      "type": "string"
+    },
+    "subtask_id": {
+      "type": "string"
+    },
+    "role": {
+      "enum": [
+        "COORDINATOR",
+        "IMPLEMENTER",
+        "VERIFIER",
+        "AUDITOR"
+      ]
+    },
+    "status": {
+      "enum": [
+        "SUCCEEDED",
+        "PARTIAL",
+        "FAILED",
+        "BLOCKED",
+        "ERROR"
+      ]
+    },
+    "contract_digest": {
+      "type": "string"
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "test_results": {
+      "type": "array"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unresolved_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "finished_at": {
+      "type": "string"
+    }
+  }
+}

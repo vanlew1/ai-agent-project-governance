@@ -1,7 +1,7 @@
 from pathlib import Path
 import argparse, sys
 SOURCE=Path(__file__).resolve().parents[1];sys.path.insert(0,str(SOURCE))
-from governance.state import store
+from governance.state import store, layout
 from governance.state.fingerprint import build, git
 from governance.guards.git_status import changed_paths
 from governance.guards.scope_guard import check as scope_check
@@ -22,6 +22,7 @@ try:
  groups=scope_check(contract,paths)
  result=result_build(contract,repo,git(repo,["branch","--show-current"]),git(repo,["rev-parse","HEAD"]),paths,groups,approval,state_status,forbidden,reasons)
  validate_mapping(result,"guard_result.schema.json")
+ store.save_p3(layout.LAST_GUARD, result, "guard_result.schema.json")
  output=dump_mapping(result,"yaml")
  if x.output_file:
   if x.output_file.exists(): raise ValueError("output exists")

@@ -5,26 +5,112 @@
   "description": "Normalized outcome of scope, operation, and test verification.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "task_id", "scope_check", "forbidden_operation_check", "tests", "completion_status", "remaining_risks"],
+  "required": [
+    "schema_version",
+    "task_id",
+    "scope_check",
+    "forbidden_operation_check",
+    "tests",
+    "completion_status",
+    "remaining_risks"
+  ],
   "properties": {
-    "schema_version": {"const": "1.0"},
-    "task_id": {"type": "string", "minLength": 1},
-    "scope_check": {"enum": ["PASS", "FAIL", "NOT_RUN"]},
-    "forbidden_operation_check": {"enum": ["PASS", "FAIL", "NOT_RUN"]},
+    "schema_version": {
+      "const": "1.0"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_check": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ]
+    },
+    "forbidden_operation_check": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ]
+    },
     "tests": {
       "type": "array",
       "items": {
-        "type": "object", "additionalProperties": false,
-        "required": ["command", "level", "status", "summary"],
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command",
+          "level",
+          "status",
+          "summary"
+        ],
         "properties": {
-          "command": {"type": "string", "minLength": 1},
-          "level": {"enum": [1, 2, 3]},
-          "status": {"enum": ["PASS", "FAIL", "NOT_RUN"]},
-          "summary": {"type": "string"}
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "level": {
+            "enum": [
+              1,
+              2,
+              3
+            ]
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          }
         }
       }
     },
-    "completion_status": {"enum": ["VERIFIED", "PARTIAL", "BLOCKED", "FAILED"]},
-    "remaining_risks": {"type": "array", "items": {"type": "string"}}
+    "completion_status": {
+      "enum": [
+        "VERIFIED",
+        "PARTIAL",
+        "BLOCKED",
+        "FAILED"
+      ]
+    },
+    "remaining_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "guard_status": {
+      "enum": [
+        "PASS",
+        "WARN",
+        "BLOCKED",
+        "ERROR"
+      ]
+    },
+    "test_plan_status": {
+      "enum": [
+        "READY",
+        "DRAFT",
+        "BLOCKED"
+      ]
+    },
+    "required_tests_passed": {
+      "type": "boolean"
+    },
+    "optional_tests_passed": {
+      "type": "boolean"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "orchestration_id": {"type":"string", "minLength":1}
   }
 }

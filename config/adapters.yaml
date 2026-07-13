@@ -1,0 +1,5 @@
+schema_version: "1.0"
+enabled: true
+adapter_order: [wechat_miniprogram, python, node, generic]
+network_allowed: false
+writes_project_files: false

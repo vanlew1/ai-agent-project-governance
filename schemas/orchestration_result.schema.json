@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/orchestration_result.schema.json",
+  "title": "Orchestration Result",
+  "description": "P6 structured local orchestration evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "orchestration_id",
+    "task_id",
+    "status",
+    "required_subtasks",
+    "verified_subtasks",
+    "issues",
+    "created_from_results"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "orchestration_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "READY_FOR_VERIFICATION",
+        "PARTIAL",
+        "FAILED",
+        "BLOCKED",
+        "STALE",
+        "ERROR"
+      ]
+    },
+    "required_subtasks": {
+      "type": "integer"
+    },
+    "verified_subtasks": {
+      "type": "integer"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_from_results": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

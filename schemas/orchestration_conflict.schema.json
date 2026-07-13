@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/orchestration_conflict.schema.json",
+  "title": "Orchestration Conflict",
+  "description": "P6 structured local orchestration evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "orchestration_id",
+    "status",
+    "conflicts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "orchestration_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "CLEAR",
+        "BLOCKED"
+      ]
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

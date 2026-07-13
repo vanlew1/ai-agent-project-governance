@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import argparse
 import shutil
 import subprocess
 import sys
+import yaml
 from pathlib import Path
 
 IGNORE_NAMES = shutil.ignore_patterns(
@@ -37,7 +39,10 @@ def prompt_yes_no(label: str, default: bool = True) -> bool:
 
 def rename_template_files(target_dir: Path) -> None:
     for path in sorted(target_dir.rglob("*.template.*")):
-        path.rename(path.with_name(path.name.replace(".template.", ".")))
+        destination = path.with_name(path.name.replace(".template.", "."))
+        if destination.exists():
+            destination.unlink()
+        path.rename(destination)
 
 
 def write_workspace_router(target_dir: Path) -> None:
@@ -85,7 +90,24 @@ def initialize_git_repo(target_dir: Path) -> None:
     subprocess.run(["git", "branch", "-M", "main"], cwd=target_dir, check=True)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Create a governed project")
+    parser.add_argument("--adapter", choices=("auto", "generic", "python", "node", "wechat_miniprogram"), default="auto")
+    return parser.parse_args()
+
+def write_adapter_config(target_dir: Path, requested: str) -> None:
+    from governance.adapters.detection import detect_adapters
+    detected = detect_adapters(target_dir)
+    adapter = detected.primary_adapter if requested == "auto" else requested
+    config_dir = target_dir / "config"; config_dir.mkdir(exist_ok=True)
+    value = {"schema_version": "1.0", "adapter": adapter, "auxiliary_adapters": list(detected.auxiliary_adapters if requested == "auto" else ()), "detection_status": detected.status if requested == "auto" else "DETECTED"}
+    (config_dir / "project_adapter.yaml").write_text(yaml.safe_dump(value, sort_keys=False), encoding="utf-8")
+    state_dir = target_dir / ".agent_state"; state_dir.mkdir(exist_ok=True)
+    state = {"schema_version":"1.0","project_mode":"DISCOVERY","architecture_status":"draft","implementation_plan_status":"draft","repository_root":".","adapter":adapter,"auxiliary_adapters":value["auxiliary_adapters"],"adapter_detection_status":value["detection_status"],"high_risk_paths":[],"default_forbidden_operations":["production_write"]}
+    (state_dir / "project_state.yaml").write_text(yaml.safe_dump(state, sort_keys=False), encoding="utf-8")
+
 def main() -> int:
+    args = parse_args()
     template_dir = Path(__file__).resolve().parents[1]
     base_dir = template_dir.parent
 
@@ -126,6 +148,7 @@ def main() -> int:
     replace_placeholders(target_dir, values)
     write_workspace_router(target_dir)
     append_project_summary(target_dir, values)
+    write_adapter_config(target_dir, args.adapter)
 
     if init_git:
         try:

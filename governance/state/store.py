@@ -16,3 +16,22 @@ def activate(contract_file:Path):
 def active(): return load_mapping(layout.ACTIVE)
 def deactivate():
     if layout.ACTIVE.exists(): layout.ACTIVE.unlink()
+
+
+def save_p3(path, value, schema_name):
+    validate_mapping(value, schema_name)
+    if value.get("task_id") != active().get("task_id"):
+        raise ValueError("P3 result task_id does not match active task")
+    write(path, dump_mapping(value, "yaml"))
+
+def load_p3(path):
+    return load_mapping(path)
+
+
+def orchestration_path(orchestration_id: str, name: str) -> Path:
+    if not orchestration_id or "/" in orchestration_id or "\\" in orchestration_id: raise ValueError("invalid orchestration id")
+    return layout.ORCHESTRATION / orchestration_id / name
+
+def save_orchestration(orchestration_id: str, name: str, value, schema_name: str):
+    validate_mapping(value, schema_name)
+    write(orchestration_path(orchestration_id, name), dump_mapping(value, "yaml"))

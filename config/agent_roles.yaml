@@ -1,0 +1,3 @@
+schema_version: "1.0"
+roles: [COORDINATOR, IMPLEMENTER, VERIFIER, AUDITOR]
+notes: Closed deterministic role registry; no remote-agent configuration.

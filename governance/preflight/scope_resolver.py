@@ -6,6 +6,7 @@ from pathlib import PurePosixPath
 from ..models.project_state import ProjectState
 from ..models.task_request import TaskRequest
 from .default_rules import DENY_PATTERNS
+from ..adapters.registry import get as get_adapter
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,8 @@ def normalize(paths: list[str]) -> tuple[str, ...]:
 
 def resolve_scope(task: TaskRequest, state: ProjectState, status: str, code_task: bool) -> Scope:
     paths = normalize(list(task.hints["likely_paths"]))
-    deny = tuple(sorted(set((*state.high_risk_paths, *DENY_PATTERNS))))
+    adapter = get_adapter(state.adapter)
+    adapter_deny = adapter.sensitive_path_patterns() if adapter else ()
+    deny = tuple(sorted(set((*state.high_risk_paths, *DENY_PATTERNS, *adapter_deny))))
     writable = list(paths) if status == "READY" and code_task else []
     return Scope(paths, {"allow": writable, "deny": list(deny)})

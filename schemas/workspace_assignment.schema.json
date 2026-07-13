@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/workspace_assignment.schema.json",
+  "title": "Workspace Assignment",
+  "description": "P6 structured local orchestration evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workspace_assignment_id",
+    "subtask_id",
+    "workspace_kind",
+    "workspace_path",
+    "branch",
+    "head_sha",
+    "read_only",
+    "created_at"
+  ],
+  "properties": {
+    "workspace_assignment_id": {
+      "type": "string"
+    },
+    "subtask_id": {
+      "type": "string"
+    },
+    "workspace_kind": {
+      "enum": [
+        "CURRENT_WORKSPACE",
+        "EXISTING_WORKTREE",
+        "TEMPORARY_TEST_REPO",
+        "EXTERNAL_MANUAL"
+      ]
+    },
+    "workspace_path": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "head_sha": {
+      "type": "string"
+    },
+    "read_only": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

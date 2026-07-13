@@ -1,0 +1,768 @@
+{
+  "adapter_detection.schema.json": {
+    "required": [
+      "schema_version",
+      "repository_root",
+      "primary_adapter",
+      "detected_adapters",
+      "confidence",
+      "evidence",
+      "conflicts",
+      "status",
+      "detected_at"
+    ],
+    "enums": {
+      "/properties/primary_adapter": [
+        "generic",
+        "python",
+        "node",
+        "wechat_miniprogram"
+      ],
+      "/properties/confidence": [
+        "high",
+        "low"
+      ],
+      "/properties/status": [
+        "DETECTED",
+        "MIXED",
+        "FALLBACK",
+        "ERROR"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/repository_root": "string",
+      "/properties/detected_adapters": "array",
+      "/properties/detected_adapters/items": "string",
+      "/properties/auxiliary_adapters": "array",
+      "/properties/auxiliary_adapters/items": "string",
+      "/properties/evidence": "array",
+      "/properties/evidence/items": "object",
+      "/properties/evidence/items/properties/adapter_id": "string",
+      "/properties/evidence/items/properties/matched_markers": "array",
+      "/properties/evidence/items/properties/matched_markers/items": "string",
+      "/properties/evidence/items/properties/score": "integer",
+      "/properties/evidence/items/properties/reasons": "array",
+      "/properties/evidence/items/properties/reasons/items": "string",
+      "/properties/conflicts": "array",
+      "/properties/conflicts/items": "string",
+      "/properties/detected_at": "string"
+    }
+  },
+  "approval.schema.json": {
+    "required": [
+      "schema_version",
+      "approval_id",
+      "task_id",
+      "approval_type",
+      "status",
+      "scope",
+      "environment_fingerprint",
+      "approved_by",
+      "approved_at",
+      "expires_when"
+    ],
+    "enums": {
+      "/properties/status": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/approval_id": "string",
+      "/properties/task_id": "string",
+      "/properties/approval_type": "string",
+      "/properties/scope": "object",
+      "/properties/environment_fingerprint": "object",
+      "/properties/approved_by": "string",
+      "/properties/approved_at": "string",
+      "/properties/expires_when": "array",
+      "/properties/expires_when/items": "string",
+      "/properties/expires_at": "string",
+      "/properties/expired_at": "string",
+      "/properties/contract_digest": "string"
+    }
+  },
+  "closure_result.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "status",
+      "guard_status",
+      "verification_status",
+      "report_path",
+      "reasons",
+      "remaining_risks",
+      "closed_at"
+    ],
+    "enums": {
+      "/properties/status": [
+        "CLOSED",
+        "PARTIAL",
+        "BLOCKED",
+        "FAILED"
+      ],
+      "/properties/verification_status": [
+        "VERIFIED",
+        "PARTIAL",
+        "BLOCKED",
+        "FAILED"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/guard_status": "string",
+      "/properties/report_path": "string",
+      "/properties/reasons": "array",
+      "/properties/reasons/items": "string",
+      "/properties/remaining_risks": "array",
+      "/properties/remaining_risks/items": "string",
+      "/properties/closed_at": "string"
+    }
+  },
+  "execution_event.schema.json": {
+    "required": [
+      "schema_version",
+      "event_type",
+      "task_id",
+      "occurred_at"
+    ],
+    "enums": {
+      "/properties/event_type": [
+        "STATE_INITIALIZED",
+        "TASK_ACTIVATED",
+        "TASK_DEACTIVATED",
+        "APPROVAL_ADDED",
+        "APPROVAL_EXPIRED",
+        "GUARD_RUN",
+        "GUARD_BLOCKED"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/occurred_at": "string"
+    }
+  },
+  "governance_module_registry.schema.json": {
+    "required": [
+      "schema_version",
+      "registry",
+      "modules"
+    ],
+    "enums": {
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/status": [
+        "existing",
+        "phase_0_baseline",
+        "planned",
+        "deferred"
+      ],
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/risk_level": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/modules": "object",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$": "object",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/owner": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/layer": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/purpose": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/paths": "array",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/paths/items": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/depends_on": "array",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/depends_on/items": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/must_not_depend_on": "array",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/must_not_depend_on/items": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/phase": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/public_entrypoints": "array",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/public_entrypoints/items": "string",
+      "/properties/modules/patternProperties/^[a-z][a-z0-9_]*$/properties/notes": "string"
+    }
+  },
+  "guard_result.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "status",
+      "repository_root",
+      "branch",
+      "head_commit",
+      "changed_paths",
+      "allowed_changes",
+      "conditional_changes",
+      "denied_changes",
+      "unmatched_changes",
+      "approval_status",
+      "state_status",
+      "forbidden_operation_status",
+      "reasons",
+      "run_at"
+    ],
+    "enums": {
+      "/properties/status": [
+        "PASS",
+        "WARN",
+        "BLOCKED",
+        "ERROR"
+      ],
+      "/properties/approval_status": [
+        "valid",
+        "missing",
+        "expired",
+        "scope_mismatch",
+        "not_required"
+      ],
+      "/properties/forbidden_operation_status": [
+        "PASS",
+        "BLOCKED"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/repository_root": "string",
+      "/properties/branch": "string",
+      "/properties/head_commit": "string",
+      "/properties/changed_paths": "array",
+      "/properties/changed_paths/items": "string",
+      "/properties/allowed_changes": "array",
+      "/properties/allowed_changes/items": "string",
+      "/properties/conditional_changes": "array",
+      "/properties/conditional_changes/items": "string",
+      "/properties/denied_changes": "array",
+      "/properties/denied_changes/items": "string",
+      "/properties/unmatched_changes": "array",
+      "/properties/unmatched_changes/items": "string",
+      "/properties/state_status": "string",
+      "/properties/reasons": "array",
+      "/properties/reasons/items": "string",
+      "/properties/run_at": "string"
+    }
+  },
+  "project_adapter_config.schema.json": {
+    "required": [
+      "schema_version",
+      "adapter",
+      "auxiliary_adapters",
+      "detection_status"
+    ],
+    "enums": {
+      "/properties/adapter": [
+        "generic",
+        "python",
+        "node",
+        "wechat_miniprogram"
+      ],
+      "/properties/detection_status": [
+        "DETECTED",
+        "MIXED",
+        "FALLBACK",
+        "ERROR"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/auxiliary_adapters": "array",
+      "/properties/auxiliary_adapters/items": "string"
+    }
+  },
+  "project_state.schema.json": {
+    "required": [
+      "schema_version",
+      "project_mode",
+      "architecture_status",
+      "implementation_plan_status",
+      "repository_root",
+      "adapter",
+      "high_risk_paths",
+      "default_forbidden_operations"
+    ],
+    "enums": {
+      "/properties/project_mode": [
+        "DISCOVERY",
+        "ADAPTATION",
+        "EXECUTION"
+      ],
+      "/properties/architecture_status": [
+        "draft",
+        "confirmed",
+        "superseded"
+      ],
+      "/properties/implementation_plan_status": [
+        "draft",
+        "ready_for_confirmation",
+        "confirmed",
+        "superseded"
+      ],
+      "/properties/adapter_detection_status": [
+        "DETECTED",
+        "MIXED",
+        "FALLBACK",
+        "ERROR"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/repository_root": "string",
+      "/properties/adapter": "string",
+      "/properties/high_risk_paths": "array",
+      "/properties/high_risk_paths/items": "string",
+      "/properties/default_forbidden_operations": "array",
+      "/properties/default_forbidden_operations/items": "string",
+      "/properties/auxiliary_adapters": "array",
+      "/properties/auxiliary_adapters/items": "string"
+    }
+  },
+  "rules_index.schema.json": {
+    "required": [
+      "version",
+      "entry",
+      "lightweight_entry",
+      "execution_contracts",
+      "project_modes",
+      "task_types",
+      "upgrade_triggers",
+      "global_forbidden"
+    ],
+    "enums": {
+      "/properties/governance_runtime/properties/phase": [
+        "PHASE_0_BASELINE",
+        "PHASE_1_MINIMUM_RUNTIME",
+        "PHASE_2_STATE_AND_GUARDS",
+        "PHASE_3_VERIFICATION_AND_CLOSURE",
+        "PHASE_4_ADAPTERS_AND_BOOTSTRAP",
+        "PHASE_5_SELF_VALIDATION_AND_CI"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/version": "string",
+      "/properties/entry": "array",
+      "/properties/entry/items": "string",
+      "/properties/lightweight_entry": "object",
+      "/properties/execution_contracts": "object",
+      "/properties/project_modes": "object",
+      "/properties/task_types": "object",
+      "/properties/upgrade_triggers": "array",
+      "/properties/upgrade_triggers/items": "string",
+      "/properties/global_forbidden": "array",
+      "/properties/global_forbidden/items": "string",
+      "/properties/governance_runtime": "object",
+      "/properties/governance_runtime/properties/runtime_behavior_enabled": "boolean",
+      "/properties/governance_runtime/properties/preflight_enabled": "boolean",
+      "/properties/governance_runtime/properties/state_persistence_enabled": "boolean",
+      "/properties/governance_runtime/properties/scope_enforcement_enabled": "boolean",
+      "/properties/governance_runtime/properties/test_execution_enabled": "boolean",
+      "/properties/governance_runtime/properties/automatic_closure_enabled": "boolean",
+      "/properties/governance_runtime/properties/approval_freshness_enabled": "boolean",
+      "/properties/governance_runtime/properties/forbidden_operation_guard_enabled": "boolean",
+      "/properties/governance_runtime/properties/test_planning_enabled": "boolean",
+      "/properties/governance_runtime/properties/adapters_enabled": "boolean",
+      "/properties/governance_runtime/properties/bootstrap_integration_enabled": "boolean",
+      "/properties/governance_runtime/properties/ci_enabled": "boolean",
+      "/properties/governance_runtime/properties/multi_agent_enabled": "boolean"
+    }
+  },
+  "task_contract.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "project_mode",
+      "task_level",
+      "status",
+      "objective",
+      "read_scope",
+      "write_scope",
+      "autonomy",
+      "stop_conditions",
+      "verification",
+      "report"
+    ],
+    "enums": {
+      "/properties/project_mode": [
+        "DISCOVERY",
+        "ADAPTATION",
+        "EXECUTION"
+      ],
+      "/properties/task_level": [
+        "A",
+        "B",
+        "C"
+      ],
+      "/properties/status": [
+        "DRAFT",
+        "READY",
+        "BLOCKED",
+        "ACTIVE",
+        "CLOSED"
+      ],
+      "/properties/report/properties/format": [
+        "compact"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/objective": "array",
+      "/properties/objective/items": "string",
+      "/properties/read_scope": "array",
+      "/properties/read_scope/items": "string",
+      "/properties/write_scope": "object",
+      "/properties/write_scope/properties/allow": "array",
+      "/properties/write_scope/properties/allow/items": "string",
+      "/properties/write_scope/properties/deny": "array",
+      "/properties/write_scope/properties/deny/items": "string",
+      "/properties/autonomy": "object",
+      "/properties/autonomy/properties/may_debug_test_failures": "boolean",
+      "/properties/autonomy/properties/may_edit_adjacent_tests": "boolean",
+      "/properties/autonomy/properties/may_edit_same_module_helpers/oneOf/0": "boolean",
+      "/properties/autonomy/properties/must_not_expand_architecture": "boolean",
+      "/properties/stop_conditions": "array",
+      "/properties/stop_conditions/items": "string",
+      "/properties/verification": "object",
+      "/properties/verification/properties/level_1": "array",
+      "/properties/verification/properties/level_1/items": "string",
+      "/properties/verification/properties/level_2": "array",
+      "/properties/verification/properties/level_2/items": "string",
+      "/properties/verification/properties/level_3": "array",
+      "/properties/verification/properties/level_3/items": "string",
+      "/properties/report": "object",
+      "/properties/report/properties/fields": "array",
+      "/properties/report/properties/fields/items": "string"
+    }
+  },
+  "task_request.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "title",
+      "description",
+      "requested_by",
+      "requested_at",
+      "hints"
+    ],
+    "enums": {},
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/title": "string",
+      "/properties/description": "string",
+      "/properties/requested_by": "string",
+      "/properties/requested_at": "string",
+      "/properties/hints": "object",
+      "/properties/hints/properties/likely_paths": "array",
+      "/properties/hints/properties/likely_paths/items": "string",
+      "/properties/hints/properties/external_access": "boolean",
+      "/properties/hints/properties/production_write": "boolean"
+    }
+  },
+  "test_plan.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "plan_id",
+      "levels",
+      "selected_commands",
+      "skipped_levels",
+      "selection_reasons",
+      "requires_approval",
+      "status",
+      "created_at"
+    ],
+    "enums": {
+      "/properties/levels/items": [
+        1,
+        2,
+        3
+      ],
+      "/properties/selected_commands/items/properties/level": [
+        1,
+        2,
+        3
+      ],
+      "/properties/skipped_levels/items": [
+        1,
+        2,
+        3
+      ],
+      "/properties/status": [
+        "READY",
+        "DRAFT",
+        "BLOCKED"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/plan_id": "string",
+      "/properties/levels": "array",
+      "/properties/selected_commands": "array",
+      "/properties/selected_commands/items": "object",
+      "/properties/selected_commands/items/properties/command_id": "string",
+      "/properties/selected_commands/items/properties/argv": "array",
+      "/properties/selected_commands/items/properties/argv/items": "string",
+      "/properties/selected_commands/items/properties/working_directory": "string",
+      "/properties/selected_commands/items/properties/timeout_seconds": "integer",
+      "/properties/selected_commands/items/properties/required": "boolean",
+      "/properties/selected_commands/items/properties/reason": "string",
+      "/properties/skipped_levels": "array",
+      "/properties/selection_reasons": "array",
+      "/properties/selection_reasons/items": "string",
+      "/properties/requires_approval": "boolean",
+      "/properties/created_at": "string"
+    }
+  },
+  "test_result.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "plan_id",
+      "command_id",
+      "level",
+      "status",
+      "exit_code",
+      "duration_ms",
+      "stdout_summary",
+      "stderr_summary",
+      "truncated",
+      "started_at",
+      "finished_at"
+    ],
+    "enums": {
+      "/properties/level": [
+        1,
+        2,
+        3
+      ],
+      "/properties/status": [
+        "PASS",
+        "FAIL",
+        "ERROR",
+        "SKIPPED",
+        "BLOCKED",
+        "TIMEOUT"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/plan_id": "string",
+      "/properties/command_id": "string",
+      "/properties/exit_code": [
+        "integer",
+        "null"
+      ],
+      "/properties/duration_ms": "integer",
+      "/properties/stdout_summary": "string",
+      "/properties/stderr_summary": "string",
+      "/properties/truncated": "boolean",
+      "/properties/started_at": "string",
+      "/properties/finished_at": "string"
+    }
+  },
+  "verification_result.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "scope_check",
+      "forbidden_operation_check",
+      "tests",
+      "completion_status",
+      "remaining_risks"
+    ],
+    "enums": {
+      "/properties/scope_check": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ],
+      "/properties/forbidden_operation_check": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ],
+      "/properties/tests/items/properties/level": [
+        1,
+        2,
+        3
+      ],
+      "/properties/tests/items/properties/status": [
+        "PASS",
+        "FAIL",
+        "NOT_RUN"
+      ],
+      "/properties/completion_status": [
+        "VERIFIED",
+        "PARTIAL",
+        "BLOCKED",
+        "FAILED"
+      ],
+      "/properties/guard_status": [
+        "PASS",
+        "WARN",
+        "BLOCKED",
+        "ERROR"
+      ],
+      "/properties/test_plan_status": [
+        "READY",
+        "DRAFT",
+        "BLOCKED"
+      ]
+    },
+    "types": {
+      "/": "object",
+      "/properties/task_id": "string",
+      "/properties/tests": "array",
+      "/properties/tests/items": "object",
+      "/properties/tests/items/properties/command": "string",
+      "/properties/tests/items/properties/summary": "string",
+      "/properties/remaining_risks": "array",
+      "/properties/remaining_risks/items": "string",
+      "/properties/required_tests_passed": "boolean",
+      "/properties/optional_tests_passed": "boolean",
+      "/properties/verified_at": "string"
+    }
+  },
+  "agent_execution_result.schema.json": {
+    "required": [
+      "schema_version",
+      "orchestration_id",
+      "task_id",
+      "subtask_id",
+      "role",
+      "status",
+      "contract_digest",
+      "head_sha",
+      "branch",
+      "workspace_fingerprint",
+      "changed_files",
+      "commands_run",
+      "test_results",
+      "artifacts",
+      "risks",
+      "unresolved_items",
+      "started_at",
+      "finished_at"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "agent_handoff.schema.json": {
+    "required": [
+      "schema_version",
+      "handoff_id",
+      "orchestration_id",
+      "task_id",
+      "from_subtask_id",
+      "to_subtask_ids",
+      "contract_digest",
+      "head_sha",
+      "branch",
+      "workspace_fingerprint",
+      "changed_files",
+      "completed_artifacts",
+      "verification_summary",
+      "open_risks",
+      "required_next_actions",
+      "created_at"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "agent_role.schema.json": {
+    "required": [
+      "schema_version",
+      "roles"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "orchestration_conflict.schema.json": {
+    "required": [
+      "schema_version",
+      "orchestration_id",
+      "status",
+      "conflicts"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "orchestration_plan.schema.json": {
+    "required": [
+      "schema_version",
+      "orchestration_id",
+      "task_id",
+      "parent_contract_digest",
+      "head_sha",
+      "branch",
+      "strategy",
+      "subtasks",
+      "dependency_edges",
+      "workspace_assignments",
+      "conflict_status",
+      "plan_status",
+      "created_at"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "orchestration_result.schema.json": {
+    "required": [
+      "schema_version",
+      "orchestration_id",
+      "task_id",
+      "status",
+      "required_subtasks",
+      "verified_subtasks",
+      "issues",
+      "created_from_results"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "subtask_contract.schema.json": {
+    "required": [
+      "schema_version",
+      "task_id",
+      "orchestration_id",
+      "subtask_id",
+      "title",
+      "role",
+      "status",
+      "required",
+      "depends_on",
+      "read_scope",
+      "write_scope",
+      "deny_scope",
+      "conditional_scope",
+      "required_command_ids",
+      "required_artifacts",
+      "workspace_assignment_id",
+      "parent_contract_digest",
+      "created_at"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "workspace_assignment.schema.json": {
+    "required": [
+      "workspace_assignment_id",
+      "subtask_id",
+      "workspace_kind",
+      "workspace_path",
+      "branch",
+      "head_sha",
+      "read_only",
+      "created_at"
+    ],
+    "enums": {},
+    "types": {}
+  }
+}

@@ -2,7 +2,7 @@
 
 A reusable governance template for AI-assisted software development with coding agents such as Codex, Antigravity-style auditors, and other autonomous development agents.
 
-AI 辅助软件开发治理模板，适用于 Codex、Antigravity 风格审计代理和其他自动化开发代理。
+AI 杈呭姪杞欢寮€鍙戞不鐞嗘ā鏉匡紝閫傜敤浜?Codex銆丄ntigravity 椋庢牸瀹¤浠ｇ悊鍜屽叾浠栬嚜鍔ㄥ寲寮€鍙戜唬鐞嗐€?
 
 This repository is a template layer, not a business project. It contains reusable governance rules, task routing, architecture placeholders, testing guidance, traceability scaffolding, and a beginner-friendly project bootstrap flow.
 
@@ -180,3 +180,24 @@ This repository has started building a deterministic governance runtime. P0 esta
 P1 adds a deterministic read-only Preflight CLI: `python scripts/agent_preflight.py --task-file task.yaml --project-state-file state.yaml`. It generates a contract only; state persistence, scope enforcement, test execution, and automatic closure remain disabled.
 
 P2 flow: preflight ? state init ? activate ? approve (only for risk) ? guard check. Guards do not run tests or repair files; approvals are not a secret store; `.agent_state/` is ignored. A dirty worktree may correctly return WARN.
+P3 flow: preflight ? activate ? guard ? test plan ? test run ? verify ? close. Only registry commands run; no network, auto-fix, or Git commit.
+
+## Governance Runtime P4
+
+Adapter flow: dapter detect → init --adapter auto|generic|python|node|wechat_miniprogram → preflight → guard → test plan → verify → close. Adapters only supply technical defaults; they do not install dependencies, access networks, or authorize writes.
+
+## Governance Runtime P5
+
+Run `python scripts/run_governance_ci.py` for the fixed, read-only local release gate. GitHub Actions uses the same gate on Linux and an isolated Windows/Unicode smoke; it has `contents: read` only and no Secrets, publishing, or Git write steps.
+
+
+P6 adds deterministic, local multi-agent orchestration contracts. Prompt bundles are manually distributed; the runtime never starts remote agents or performs Git writes.
+
+
+## Governance Runtime V1 (1.0.0)
+
+The runtime now provides a deterministic local workflow across P0?P6: preflight, state/approval/guard, allowlisted verification and closure, adapters/bootstrap, a read-only local CI gate, and multi-agent contracts. Run `python scripts/run_governance_ci.py` before a release-oriented change.
+
+For a single Agent, use the preflight ? state ? guard ? test-plan ? test-run ? verify ? close workflow. For multiple Agents, a coordinator produces a plan and prompt bundle; humans distribute it to separate threads, workers return structured results/handoffs, and a verifier aggregates them. It never starts Agents, creates worktrees, calls remote APIs, or writes Git state.
+
+See `docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md`, `docs/RUNTIME_CI_GUIDE.md`, `docs/MULTI_AGENT_ORCHESTRATION_GUIDE.md`, and `docs/MULTI_AGENT_HANDOFF_PROTOCOL.md`. GitHub Actions is configured but this local checkout has not pushed V1 or observed remote CI.

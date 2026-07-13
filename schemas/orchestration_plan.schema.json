@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/orchestration_plan.schema.json",
+  "title": "Orchestration Plan",
+  "description": "P6 structured local orchestration evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "orchestration_id",
+    "task_id",
+    "parent_contract_digest",
+    "head_sha",
+    "branch",
+    "strategy",
+    "subtasks",
+    "dependency_edges",
+    "workspace_assignments",
+    "conflict_status",
+    "plan_status",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "orchestration_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "head_sha": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "workspace_fingerprint": {
+      "type": "string"
+    },
+    "parent_contract_digest": {
+      "type": "string"
+    },
+    "strategy": {
+      "enum": [
+        "SERIAL",
+        "PARALLEL_SAFE",
+        "HYBRID"
+      ]
+    },
+    "subtasks": {
+      "type": "array"
+    },
+    "dependency_edges": {
+      "type": "array"
+    },
+    "workspace_assignments": {
+      "type": "array"
+    },
+    "conflict_status": {
+      "enum": [
+        "UNKNOWN",
+        "CLEAR",
+        "BLOCKED"
+      ]
+    },
+    "plan_status": {
+      "enum": [
+        "DRAFT",
+        "VALIDATED",
+        "BLOCKED",
+        "ACTIVE",
+        "COMPLETED",
+        "FAILED",
+        "STALE"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "validation_errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

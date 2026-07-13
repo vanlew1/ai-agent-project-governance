@@ -1,0 +1,6 @@
+schema_version: "1.0"
+single_writer: true
+allow_real_worktree_operations: false
+allow_remote_agent_calls: false
+allow_git_writes: false
+required_handoff_for_serial_write: true

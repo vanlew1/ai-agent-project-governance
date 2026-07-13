@@ -1,0 +1,4 @@
+schema_version: "1.0"
+commands:
+  python-unittest-discover: {adapter: python, level: 1, network_allowed: false, writes_project_files: false}
+  node-npm-test: {adapter: node, level: 1, network_allowed: false, writes_project_files: false}

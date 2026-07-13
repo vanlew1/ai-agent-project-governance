@@ -88,8 +88,8 @@ def validate_schemas(root: Path, errors: list[str]) -> dict[str, dict[str, Any]]
             errors.append(f"Cannot load schema {path.relative_to(root)}: {exc}")
         except Exception as exc:
             errors.append(f"Invalid schema {path.relative_to(root)}: {exc}")
-    if len(schemas) != 9:
-        errors.append(f"Expected 9 schemas, found {len(schemas)}")
+    if len(schemas) != 22:
+        errors.append(f"Expected 22 schemas, found {len(schemas)}")
     return schemas
 
 
@@ -111,8 +111,24 @@ def validate_yaml_contracts(root: Path, schemas: dict[str, dict[str, Any]], erro
     try:
         registry = load_yaml(root / "docs/GOVERNANCE_RUNTIME_MODULE_REGISTRY.yaml")
         Draft202012Validator(schemas["governance_module_registry.schema.json"]).validate(registry)
+        for module_name, module in registry["modules"].items():
+            for reference in module["paths"]:
+                if reference != ".agent_state/" and not (root / reference).exists():
+                    errors.append(f"Unresolved module path ({module_name}): {reference}")
     except Exception as exc:
         errors.append(f"Module registry validation failed: {exc}")
+    try:
+        runtime = rules_index["governance_runtime"]
+        architecture = (root / runtime["architecture"]).read_text(encoding="utf-8")
+        if runtime["phase"] not in architecture:
+            errors.append("Runtime phase is not recorded in architecture")
+        workflow = root / ".github/workflows/governance-ci.yml"
+        if bool(runtime.get("ci_enabled")) != workflow.is_file():
+            errors.append("CI enabled flag and workflow presence differ")
+        if runtime.get("phase") == "PHASE_6_MULTI_AGENT_ORCHESTRATION" and runtime.get("multi_agent_enabled") is not True:
+            errors.append("P6 requires multi-agent enabled")
+    except Exception as exc:
+        errors.append(f"Runtime metadata validation failed: {exc}")
 
 
 def main() -> int:
@@ -123,14 +139,14 @@ def main() -> int:
         return 2
     validate_documents(root, errors)
     schemas = validate_schemas(root, errors)
-    if len(schemas) == 9:
+    if len(schemas) == 14:
         validate_yaml_contracts(root, schemas, errors)
     if errors:
         print(f"Governance baseline validation: FAIL ({len(errors)} issue(s))")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("Governance baseline validation: PASS (9 schemas, rules index, module registry, references)")
+    print("Governance baseline validation: PASS (22 schemas, rules index, module registry, references)")
     return 0
 
 

@@ -121,6 +121,18 @@ modules:
     phase: P3
     public_entrypoints: []
     notes: Test planner, command runner, and closure evaluator are deferred.
+  adapter_protocol:
+    owner: framework_maintainers
+    layer: adapters
+    purpose: Closed technical-stack adapter protocol, registry and detection.
+    status: existing
+    paths: [governance/adapters/]
+    depends_on: [runtime_models, schema_contracts]
+    must_not_depend_on: [project_business_code, network]
+    risk_level: medium
+    phase: P4
+    public_entrypoints: [scripts/agent_detect_adapter.py]
+    notes: Deterministic stack defaults and bootstrap configuration; no plugins or command execution.
   future_adapters:
     owner: framework_maintainers
     layer: adapters
@@ -133,3 +145,29 @@ modules:
     phase: P4
     public_entrypoints: []
     notes: No adapters are implemented in P0.
+
+  self_validation_ci:
+    owner: framework_maintainers
+    layer: verification_and_closure
+    purpose: Fixed local release gate, compatibility checks, and least-privilege CI validation.
+    status: existing
+    paths: [scripts/run_governance_ci.py, scripts/check_schema_compatibility.py, scripts/check_template_integrity.py, scripts/check_runtime_dependencies.py, scripts/check_ci_security.py, scripts/check_python_syntax.py, .github/workflows/governance-ci.yml]
+    depends_on: [validation_tooling, adapter_protocol]
+    must_not_depend_on: [network, secrets, production_data, multi_agent]
+    risk_level: high
+    phase: P5
+    public_entrypoints: [scripts/run_governance_ci.py]
+    notes: Read-only release checks and CI; no publishing, deployment, or Git write automation.
+
+  orchestration_runtime:
+    owner: framework_maintainers
+    layer: multi_agent_orchestration
+    purpose: Deterministic local plan, ownership, handoff, scheduling, and aggregation.
+    status: existing
+    paths: [governance/orchestration/, scripts/agent_orchestrate.py, scripts/agent_handoff.py, scripts/agent_aggregate.py]
+    depends_on: [state_store, future_verification]
+    must_not_depend_on: [network, external_models, project_business_code]
+    risk_level: high
+    phase: P6
+    public_entrypoints: [scripts/agent_orchestrate.py, scripts/agent_handoff.py, scripts/agent_aggregate.py]
+    notes: Local contracts only; no automatic agent or Git operations.

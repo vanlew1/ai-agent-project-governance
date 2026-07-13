@@ -3,7 +3,7 @@
 ## Status
 
 - Architecture version: `1.0`
-- Implementation status: `PHASE_2_STATE_AND_GUARDS`
+- Implementation status: `PHASE_5_SELF_VALIDATION_AND_CI`
 - Runtime behavior enabled: `true` (Preflight only)
 - Scope: the governance runtime architecture of this framework itself.
 - Non-scope: `docs/ARCHITECTURE.template.md` remains the architecture template for downstream projects.
@@ -63,26 +63,26 @@ Deterministic local code must perform work that can be decided locally; the Agen
 
 ```text
 ai-agent-project-governance/
-├─ agent_rules/                         # Human/Agent-readable principles
-│  ├─ RULES_INDEX.yaml
-│  ├─ 00_rule_router.md ... 15_plan_adaptation_rules.md
-│  └─ 16_autonomous_execution_rules.md  # planned after P0
-├─ governance/                          # Deterministic runtime, not business code
-│  ├─ cli.py
-│  ├─ models/       # project_state, task_request, task_contract, approval, verification, execution_event
-│  ├─ preflight/    # engine, mode, classification, risk, gate, scope, contract
-│  ├─ policy/       # loader, registry, precedence, validator
-│  ├─ state/        # store, approvals, freshness, migration
-│  ├─ guards/       # scope, forbidden operations, secrets, git
-│  ├─ verification/ # planning, running, normalization, closure, reports
-│  ├─ assets/       # locator, manifest, compatibility
-│  └─ adapters/     # base, generic, python, node, wechat_miniprogram
-├─ schemas/                             # Unique structural format constraints
-├─ config/                              # Configurable non-secret defaults
-├─ scripts/                             # Public command-line entry points
-├─ docs/                                # Long-lived framework and project facts
-├─ tests/                               # Framework tests, never downstream business tests
-└─ .agent_state/                        # Generated, ignored workspace state (future phase)
+鈹溾攢 agent_rules/                         # Human/Agent-readable principles
+鈹? 鈹溾攢 RULES_INDEX.yaml
+鈹? 鈹溾攢 00_rule_router.md ... 15_plan_adaptation_rules.md
+鈹? 鈹斺攢 16_autonomous_execution_rules.md  # planned after P0
+鈹溾攢 governance/                          # Deterministic runtime, not business code
+鈹? 鈹溾攢 cli.py
+鈹? 鈹溾攢 models/       # project_state, task_request, task_contract, approval, verification, execution_event
+鈹? 鈹溾攢 preflight/    # engine, mode, classification, risk, gate, scope, contract
+鈹? 鈹溾攢 policy/       # loader, registry, precedence, validator
+鈹? 鈹溾攢 state/        # store, approvals, freshness, migration
+鈹? 鈹溾攢 guards/       # scope, forbidden operations, secrets, git
+鈹? 鈹溾攢 verification/ # planning, running, normalization, closure, reports
+鈹? 鈹溾攢 assets/       # locator, manifest, compatibility
+鈹? 鈹斺攢 adapters/     # base, generic, python, node, wechat_miniprogram
+鈹溾攢 schemas/                             # Unique structural format constraints
+鈹溾攢 config/                              # Configurable non-secret defaults
+鈹溾攢 scripts/                             # Public command-line entry points
+鈹溾攢 docs/                                # Long-lived framework and project facts
+鈹溾攢 tests/                               # Framework tests, never downstream business tests
+鈹斺攢 .agent_state/                        # Generated, ignored workspace state (future phase)
 ```
 
 Directory boundaries are fixed: `agent_rules/` declares principles; `governance/` implements deterministic runtime behavior; `schemas/` constrains all structured files; `config/` contains non-secret policy defaults; `docs/` records durable facts; `tests/` validates the framework. `.agent_state/` is a future generated directory and must remain untracked. It is not created in P0.
@@ -142,7 +142,8 @@ Local deterministic code performs schema validation, Git change enumeration, pat
 
 ## 9. Adapter Boundary
 
-All adapters implement a common technical interface: detection, default validation commands, path classification, discovery of test commands, sensitive-path patterns, and generated-path patterns. The first target adapters are `generic`, `python`, `node`, and `wechat_miniprogram`. They may provide stack defaults only; they must not infer business policy or depend on project business code.
+All adapters implement a common technical interface: detection, default validation commands, path classification, discovery of test commands, sensitive-path patterns, and generated-path patterns. The first target adapters are `generic`, `python`,
+ode`, and `wechat_miniprogram`. They may provide stack defaults only; they must not infer business policy or depend on project business code.
 
 ## 10. Validation and CI Target
 
@@ -166,7 +167,7 @@ The framework retains `AGENTS.md`, existing `agent_rules/`, architecture/module/
 | P5 | Framework self-validation and CI | compatibility, CI, migration, release regression |
 | P6 | Multi-agent cooperation | audit/implementation protocol, handoff, locks/conflicts |
 
-Each task implements only its current phase. P0 precedes P1, and P1–P6 behavior must not be introduced early.
+Each task implements only its current phase. P0 precedes P1, and P1鈥揚6 behavior must not be introduced early.
 
 ## 13. Dependency Direction
 
@@ -201,7 +202,7 @@ The same fact must not be maintained in conflicting chat records, reports, or pa
 
 ## 15. Architecture Acceptance Criteria
 
-The completed architecture must support proof that a pure A-class text task reads only quick context, its contract, and related files; ordinary repair-test failures continue autonomously; unapproved live API requests generate a checkpoint without edits or calls; valid approvals are reusable; scope violations are discoverable; tests can escalate 1→2→3; compact outputs avoid diffs; initialized projects self-validate; supported stacks share the same core runtime; CI validates rules/schemas/templates; and necessary safety/rollback/testing is never skipped to save tokens.
+The completed architecture must support proof that a pure A-class text task reads only quick context, its contract, and related files; ordinary repair-test failures continue autonomously; unapproved live API requests generate a checkpoint without edits or calls; valid approvals are reusable; scope violations are discoverable; tests can escalate 1鈫?鈫?; compact outputs avoid diffs; initialized projects self-validate; supported stacks share the same core runtime; CI validates rules/schemas/templates; and necessary safety/rollback/testing is never skipped to save tokens.
 
 P0 acceptance is narrower: this document, the separate module registry, schemas, non-behavioral package markers, baseline validator, and baseline tests must be present and mutually valid; existing routing must remain unchanged; and `runtime_behavior_enabled` must remain `false`.
 
@@ -212,3 +213,21 @@ P1 provides the deterministic, read-only `scripts/agent_preflight.py` entry poin
 ## P2 State and Guard Baseline
 
 P2 adds explicit local state persistence, Approval freshness primitives, read-only changed-path collection, Scope classification, forbidden-operation evidence checks, and autonomy failure classification. Test planning/execution, Verification/Closure, adapters, and multi-agent behavior remain unimplemented.
+## P3 Verification and Closure
+P3 provides allowlisted test planning/execution, verification, closure, and compact reports.
+
+## P4 Adapters and Bootstrap
+P4 provides deterministic generic, Python, Node, and WeChat Mini Program adapters, closed registry selection, adapter-aware test planning and guard path classification, and bootstrap adapter configuration.
+
+## P5 Self-Validation and CI
+P5 adds fixture-backed Schema compatibility, reference and dependency checks, isolated Bootstrap verification, a fixed local release gate, and read-only GitHub Actions CI. Multi-agent behavior remains disabled.
+
+
+## PHASE_6_MULTI_AGENT_ORCHESTRATION
+
+P6 adds a deterministic local orchestration layer: closed roles, schema-validated subtask contracts, DAG and single-writer validation, workspace assignments, structured handoffs and freshness checks, aggregation, and human-distributed prompt bundles. It does not start Agents, access remote APIs, create worktrees/branches, or perform Git writes.
+
+
+## Governance Runtime V1 Close
+
+V1 (1.0.0) completes the local deterministic P0?P6 runtime. It is locally validated by the fixed release gate and isolated single-/multi-agent CLI acceptance tests. Remote GitHub Actions validation remains an explicit post-commit/push activity and is not implied by this document.

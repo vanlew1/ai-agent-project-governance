@@ -70,7 +70,10 @@
           "enum": [
             "PHASE_0_BASELINE",
             "PHASE_1_MINIMUM_RUNTIME",
-            "PHASE_2_STATE_AND_GUARDS"
+            "PHASE_2_STATE_AND_GUARDS",
+            "PHASE_3_VERIFICATION_AND_CLOSURE",
+            "PHASE_4_ADAPTERS_AND_BOOTSTRAP",
+            "PHASE_5_SELF_VALIDATION_AND_CI", "PHASE_6_MULTI_AGENT_ORCHESTRATION"
           ]
         },
         "architecture": {
@@ -107,6 +110,18 @@
           "type": "boolean"
         },
         "test_planning_enabled": {
+          "type": "boolean"
+        },
+        "adapters_enabled": {
+          "type": "boolean"
+        },
+        "bootstrap_integration_enabled": {
+          "type": "boolean"
+        },
+        "ci_enabled": {
+          "type": "boolean"
+        },
+        "multi_agent_enabled": {
           "type": "boolean"
         }
       }

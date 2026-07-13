@@ -14,13 +14,16 @@ class ProjectState:
     adapter: str
     high_risk_paths: tuple[str, ...]
     default_forbidden_operations: tuple[str, ...]
+    auxiliary_adapters: tuple[str, ...] = ()
+    adapter_detection_status: str = "DETECTED"
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "ProjectState":
         copied = dict(value)
         copied["high_risk_paths"] = tuple(copied["high_risk_paths"])
         copied["default_forbidden_operations"] = tuple(copied["default_forbidden_operations"])
+        copied["auxiliary_adapters"] = tuple(copied.get("auxiliary_adapters", ()))
         return cls(**copied)
 
     def to_mapping(self) -> dict[str, Any]:
-        return {**self.__dict__, "high_risk_paths": list(self.high_risk_paths), "default_forbidden_operations": list(self.default_forbidden_operations)}
+        return {**self.__dict__, "high_risk_paths": list(self.high_risk_paths), "default_forbidden_operations": list(self.default_forbidden_operations), "auxiliary_adapters": list(self.auxiliary_adapters)}

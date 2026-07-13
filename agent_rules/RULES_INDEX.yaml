@@ -202,7 +202,7 @@ global_forbidden:
   - "外部平台或数据接入方式未确认前实现真实访问代码"
 
 governance_runtime:
-  phase: PHASE_2_STATE_AND_GUARDS
+  phase: PHASE_6_MULTI_AGENT_ORCHESTRATION
   architecture: docs/GOVERNANCE_RUNTIME_ARCHITECTURE.md
   module_registry: docs/GOVERNANCE_RUNTIME_MODULE_REGISTRY.yaml
   schema_directory: schemas
@@ -212,6 +212,10 @@ governance_runtime:
   scope_enforcement_enabled: true
   approval_freshness_enabled: true
   forbidden_operation_guard_enabled: true
-  test_planning_enabled: false
-  test_execution_enabled: false
-  automatic_closure_enabled: false
+  adapters_enabled: true
+  bootstrap_integration_enabled: true
+  ci_enabled: true
+  multi_agent_enabled: true
+  test_planning_enabled: true
+  test_execution_enabled: true
+  automatic_closure_enabled: true
