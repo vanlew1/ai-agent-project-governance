@@ -1,0 +1,273 @@
+"""Assemble a safe, local-only adoption plan without changing the target project."""
+from __future__ import annotations
+
+from hashlib import sha256
+from pathlib import Path
+from typing import Any
+
+from governance.adapters import detect_adapters, get
+from governance.audit.checks import run_audit
+from governance.schema_loader import validate_mapping
+
+
+SOURCE_ROOT = Path(__file__).resolve().parents[2]
+MAX_COMPARISON_BYTES = 128 * 1024
+ASSETS = (
+    ("AGENTS.md", "AGENTS.md", "Agent-facing project boundary instructions."),
+    ("agent_rules", "agent_rules", "Reusable governance rules; tailor project-specific rules manually."),
+    ("config/presets", "config/presets", "Preset definitions for review, not an automatic selection."),
+    ("governance", "governance", "Local runtime package; ownership requires review."),
+    ("schemas", "schemas", "Runtime data contracts; preserve version compatibility."),
+    ("scripts/agent_preflight.py", "scripts/agent_preflight.py", "Preflight entry point after approved configuration."),
+    ("scripts/agent_state.py", "scripts/agent_state.py", "State entry point; do not activate automatically."),
+    ("scripts/agent_guard.py", "scripts/agent_guard.py", "Guard entry point after explicit state activation."),
+    ("scripts/agent_test_plan.py", "scripts/agent_test_plan.py", "Test-plan entry point; commands require review."),
+    ("scripts/agent_test_run.py", "scripts/agent_test_run.py", "Test runner; never execute from this planner."),
+    ("scripts/agent_verify.py", "scripts/agent_verify.py", "Verification entry point after reviewed evidence."),
+    ("scripts/agent_close.py", "scripts/agent_close.py", "Closure entry point after verified evidence."),
+)
+
+FIELD_SEMANTICS = {
+    "audit_configuration_completeness_score": {
+        "meaning": "Fixed-weight completeness score produced by the existing local adoption audit.",
+        "does_not_mean": "It is not a security certification, adoption approval, or product readiness score.",
+    },
+    "adapter_detection_confidence": {
+        "meaning": "Strength of supported-stack markers found by the existing detector.",
+        "does_not_mean": "It does not prove the stack is complete, compatible, safe, or authorized for adoption.",
+    },
+    "test_candidate_confidence": {
+        "meaning": "Completeness of static local evidence for a candidate command.",
+        "does_not_mean": "It does not prove a command will pass, avoid network or writes, or have human approval to run.",
+    },
+    "preset_recommendation_confidence": {
+        "meaning": "Completeness of the local audit evidence behind the recommendation.",
+        "does_not_mean": "It is not an automatic preset choice or authorization to copy or activate governance assets.",
+    },
+}
+
+
+def _sha256(path: Path) -> str | None:
+    try:
+        if path.stat().st_size > MAX_COMPARISON_BYTES:
+            return None
+        return sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def _asset_entry(source_relative: str, target_relative: str, ownership_note: str, root: Path) -> dict[str, object]:
+    source = SOURCE_ROOT / source_relative
+    target = root / target_relative
+    entry: dict[str, object] = {
+        "source": source_relative,
+        "target": target_relative,
+        "conflict": False,
+        "ownership_note": ownership_note,
+        "requires_confirmation": True,
+    }
+    if not source.exists():
+        entry["operation"] = "MISSING_SOURCE"
+    elif not target.exists():
+        entry["operation"] = "CREATE"
+    elif source.is_file() and target.is_file():
+        source_hash = _sha256(source)
+        target_hash = _sha256(target)
+        same = source_hash is not None and source_hash == target_hash
+        entry["operation"] = "EXISTS_SAME" if same else "EXISTS_DIFFERENT"
+        entry["conflict"] = not same
+    else:
+        entry["operation"] = "REQUIRES_CONFIRMATION"
+        entry["conflict"] = True
+        entry["ownership_note"] += " Existing directories or unlike path types are not compared recursively."
+    return entry
+
+
+def _asset_manifest(root: Path) -> list[dict[str, object]]:
+    return [_asset_entry(source, target, note, root) for source, target, note in ASSETS]
+
+
+def _marker_evidence(detection: Any, adapter_id: str) -> list[str]:
+    for evidence in detection.evidence:
+        if evidence.adapter_id == adapter_id:
+            return list(evidence.matched_markers)
+    return []
+
+
+def _candidate(command: str, evidence: list[str], confidence: str, scope: str) -> dict[str, object]:
+    return {
+        "command": command,
+        "evidence": evidence,
+        "confidence": confidence,
+        "estimated_scope": scope,
+        "network_risk": "unknown_until_review",
+        "write_risk": "unknown_until_review",
+        "requires_confirmation": True,
+    }
+
+
+def _test_candidates(root: Path, detection: Any) -> list[dict[str, object]]:
+    candidates: list[dict[str, object]] = []
+    adapters = set(detection.detected_adapters)
+    if "python" in adapters and (root / "tests").is_dir():
+        evidence = _marker_evidence(detection, "python") + ["tests/"]
+        candidates.append(_candidate("python3 -m unittest discover -s tests", evidence, "medium", "Python tests below tests/"))
+    node = get("node")
+    if node and ("node" in adapters or "wechat_miniprogram" in adapters) and "test" in node.package_scripts(root):
+        evidence = _marker_evidence(detection, "node") + ["package.json:scripts.test"]
+        candidates.append(_candidate("npm test", evidence, "high", "Project package.json test script"))
+    return candidates
+
+
+def _audit_mapping(root: Path) -> dict[str, object]:
+    audit = run_audit(root)
+    return {
+        "schema_version": audit.schema_version,
+        "tool_version": audit.tool_version,
+        "configuration_completeness_score": audit.score,
+        "level": audit.level,
+        "recommended_preset": audit.recommended_preset,
+        "checks": [check.to_dict() for check in audit.checks],
+        "score_meaning": FIELD_SEMANTICS["audit_configuration_completeness_score"]["meaning"],
+        "score_does_not_mean": FIELD_SEMANTICS["audit_configuration_completeness_score"]["does_not_mean"],
+    }
+
+
+def _adapter_mapping(root: Path) -> tuple[Any, dict[str, object]]:
+    detection = detect_adapters(root)
+    return detection, {
+        "schema_version": detection.schema_version,
+        "primary_adapter": detection.primary_adapter,
+        "detected_adapters": list(detection.detected_adapters),
+        "auxiliary_adapters": list(detection.auxiliary_adapters),
+        "detection_confidence": detection.confidence,
+        "confidence_meaning": FIELD_SEMANTICS["adapter_detection_confidence"]["meaning"],
+        "confidence_does_not_mean": FIELD_SEMANTICS["adapter_detection_confidence"]["does_not_mean"],
+        "evidence": [item.to_mapping() for item in detection.evidence],
+        "conflicts": list(detection.conflicts),
+        "status": detection.status,
+    }
+
+
+def _preset_recommendation(audit: dict[str, object], detection: Any) -> dict[str, object]:
+    recommendation = str(audit["recommended_preset"])
+    alternatives = [item for item in ("lightweight", "standard", "strict") if item != recommendation]
+    confidence = "medium" if detection.status == "DETECTED" else "low"
+    evidence = [f"audit:{check['check_id']}={check['status']}" for check in audit["checks"] if check["status"] != "PASS"]
+    return {
+        "recommendation": recommendation,
+        "reason": "Recommendation is reused from the local configuration-completeness audit and requires owner review.",
+        "evidence": evidence or ["all audit checks passed"],
+        "confidence": confidence,
+        "confidence_meaning": FIELD_SEMANTICS["preset_recommendation_confidence"]["meaning"],
+        "confidence_does_not_mean": FIELD_SEMANTICS["preset_recommendation_confidence"]["does_not_mean"],
+        "alternatives": alternatives,
+        "requires_confirmation": True,
+    }
+
+
+def _task_draft() -> dict[str, object]:
+    return {
+        "draft_status": "UNTRUSTED_DRAFT",
+        "authorization": "REQUIRES_CONFIRMATION",
+        "task_id": "UNRESOLVED",
+        "objective": "UNRESOLVED: define one reversible first task.",
+        "read_scope": ["UNRESOLVED"],
+        "write_scope": {"allow": [], "deny": ["production/**", "secrets/**", ".env", ".agent_state/**", "deploy/**", "data/production/**"]},
+        "test_command": "UNRESOLVED",
+        "note": "This is not a valid or authorized task.yaml. Review every field before creating a file.",
+    }
+
+
+def _project_state_draft() -> dict[str, object]:
+    return {
+        "draft_status": "UNTRUSTED_DRAFT",
+        "authorization": "REQUIRES_CONFIRMATION",
+        "project_mode": "UNRESOLVED",
+        "architecture_status": "UNRESOLVED",
+        "implementation_plan_status": "UNRESOLVED",
+        "adapter": "RECOMMENDATION_ONLY",
+        "high_risk_paths": ["UNRESOLVED"],
+        "default_forbidden_operations": ["production_write", "external_api", "git_write", "release", "deployment"],
+        "note": "This is not a valid or authorized project_state.yaml and is never written by the planner.",
+    }
+
+
+def _confirmations() -> list[dict[str, str]]:
+    return [
+        {"area": "preset", "reason": "A recommendation does not select a preset.", "status": "REQUIRES_CONFIRMATION"},
+        {"area": "asset_manifest", "reason": "Every create, conflict, ownership, and overwrite decision needs review.", "status": "REQUIRES_CONFIRMATION"},
+        {"area": "task_scope", "reason": "Allowed and denied paths cannot be inferred safely.", "status": "REQUIRES_CONFIRMATION"},
+        {"area": "project_state", "reason": "Mode and high-risk paths determine runtime behavior.", "status": "REQUIRES_CONFIRMATION"},
+        {"area": "test_command", "reason": "Candidates are not approved to execute.", "status": "REQUIRES_CONFIRMATION"},
+    ]
+
+
+def _blocked_decisions() -> list[dict[str, str]]:
+    decisions = (
+        "production data or database access",
+        "credentials, secrets, external APIs, or network access",
+        "Git writes, release, deployment, or remote repository operations",
+        "business-semantic or security-policy changes",
+        "state activation, test execution, asset copying, or formal configuration generation",
+    )
+    return [{"decision": decision, "reason": "The read-only planner has no authority to decide or perform this action.", "status": "MUST_NOT_AUTO_DECIDE"} for decision in decisions]
+
+
+def _next_commands(root: Path, candidates: list[dict[str, object]]) -> list[dict[str, object]]:
+    commands: list[dict[str, object]] = [
+        {"command": "Review this dry-run plan and resolve required confirmations.", "requires_confirmation": False, "note": "No target-project modification occurs."},
+        {"command": "python3 scripts/agent_audit.py --project-root <target-project> --format json", "requires_confirmation": False, "note": "Optional repeated read-only audit."},
+    ]
+    if candidates:
+        commands.append({"command": "Review one test candidate before adding it to an approved task plan.", "requires_confirmation": True, "note": "Do not run the candidate from this planner."})
+    if any((root / target).exists() for _, target, _ in ASSETS):
+        commands.append({"command": "Resolve existing asset conflicts manually against the reviewed manifest.", "requires_confirmation": True, "note": "No copy or overwrite command is generated."})
+    return commands
+
+
+def _warnings(detection: Any, candidates: list[dict[str, object]]) -> list[str]:
+    warnings = ["This dry-run plan did not modify the target project, create .agent_state, copy assets, or run tests."]
+    if detection.confidence == "low":
+        warnings.append("Adapter detection is low confidence; treat the stack and test guidance as unresolved until reviewed.")
+    if not candidates:
+        warnings.append("No reliable test candidate was found. Do not guess or execute a command automatically.")
+    return warnings
+
+
+def build_plan(project_root: Path) -> dict[str, object]:
+    """Build and schema-validate an untrusted adoption plan using reads only."""
+    root = project_root.expanduser().resolve()
+    if not root.is_dir():
+        raise ValueError("--project-root must be an existing directory")
+    detection, adapter = _adapter_mapping(root)
+    audit = _audit_mapping(root)
+    candidates = _test_candidates(root, detection)
+    manifest = _asset_manifest(root)
+    value: dict[str, object] = {
+        "schema_version": "1.0",
+        "mode": "dry-run",
+        "project_root": "<target-project>",
+        "read_only": True,
+        "field_semantics": FIELD_SEMANTICS,
+        "adapter": adapter,
+        "audit": audit,
+        "preset_recommendation": _preset_recommendation(audit, detection),
+        "test_candidates": candidates,
+        "asset_manifest": manifest,
+        "conflicts": [item for item in manifest if item["conflict"]],
+        "task_draft": _task_draft(),
+        "project_state_draft": _project_state_draft(),
+        "required_confirmations": _confirmations(),
+        "blocked_decisions": _blocked_decisions(),
+        "next_commands": _next_commands(root, candidates),
+        "rollback_checklist": [
+            "No target-project changes occurred in this dry run.",
+            "Before any future write, create a normal backup or branch approved by the project owner.",
+            "For each approved create or overwrite, record the target and its recovery source before applying it.",
+            "Do not execute rollback automatically; review the approved change set first.",
+        ],
+        "warnings": _warnings(detection, candidates),
+    }
+    validate_mapping(value, "adoption_plan.schema.json")
+    return value
