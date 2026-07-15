@@ -1,4 +1,85 @@
 {
+  "adoption_lifecycle_evidence.schema.json": {
+    "required": ["schema_version", "evidence_type", "status", "target_identity_digest", "previous_state_digest", "upstream_evidence_digests", "payload"],
+    "enums": {},
+    "types": {}
+  },
+  "activation_approval.schema.json": {
+    "required": ["schema_version", "approved_by_user", "approved_action", "target_identity_digest", "runtime_artifact_manifest_digest", "final_install_approval_digest", "installation_receipt_digest", "compiler", "runtime_artifacts", "expected_current_state", "requested_transition", "blocked_decisions"],
+    "enums": {},
+    "types": {}
+  },
+  "activation_receipt.schema.json": {
+    "required": ["schema_version", "status", "target_identity_digest", "runtime_artifact_manifest_digest", "final_install_approval_digest", "installation_receipt_digest", "activation_approval_digest", "activation_receipt_binding_digest", "compiler_id", "compiler_version", "compiler_digest", "task_contract_digest", "project_state_digest_before", "project_state_digest_after", "activated", "preflight_executed", "tests_executed", "verification_completed", "closure_completed"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_confirmation.schema.json": {
+    "required": [
+      "schema_version",
+      "plan_digest",
+      "confirmed_by_user",
+      "preset",
+      "scope",
+      "test_selection",
+      "autonomy",
+      "blocked_decisions"
+    ],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_final_approval.schema.json": {
+    "required": ["schema_version", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "runtime_artifact_manifest_digest", "compiler", "runtime_artifacts", "approved_by_user", "approved_action", "approved_files", "conflict_policy", "rollback_on_failure", "blocked_decisions"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_installation_receipt.schema.json": {
+    "required": ["schema_version", "status", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "final_approval_digest", "runtime_artifact_manifest_digest", "compiler", "installed", "activated", "tests_executed", "verification_completed", "closure_completed", "created_files", "created_directories", "file_hashes", "blocked_decisions", "automatic_rollback_available", "rollback_assessment_available", "rollback_mode"],
+    "enums": {},
+    "types": {}
+  },
+  "runtime_artifact_manifest.schema.json": {
+    "required": ["schema_version", "compiler_id", "compiler_version", "compiler_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "source_draft_digests", "runtime_artifacts", "manifest_digest"],
+    "enums": {},
+    "types": {}
+  },
+  "rollback_assessment.schema.json": {
+    "required": ["schema_version", "status", "target_identity_match", "automatic_rollback_available", "rollback_mode", "candidates", "conflicts", "warnings"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_rollback_approval.schema.json": {
+    "required": ["schema_version", "target_identity_digest", "installation_receipt_digest", "approved_by_user", "approved_action"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_plan.schema.json": {
+    "required": [
+      "schema_version",
+      "mode",
+      "project_root",
+      "read_only",
+      "target_identity",
+      "plan_digest",
+      "field_semantics",
+      "adapter",
+      "audit",
+      "preset_recommendation",
+      "test_candidates",
+      "asset_manifest",
+      "conflicts",
+      "task_draft",
+      "scope_candidates",
+      "project_state_draft",
+      "required_confirmations",
+      "blocked_decisions",
+      "next_commands",
+      "rollback_checklist",
+      "warnings"
+    ],
+    "enums": {},
+    "types": {}
+  },
   "adapter_detection.schema.json": {
     "required": [
       "schema_version",

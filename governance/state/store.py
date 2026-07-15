@@ -10,6 +10,11 @@ def init(project_file:Path, force=False):
     value=load_mapping(project_file); validate_mapping(value,'project_state.schema.json'); write(layout.PROJECT,dump_mapping(value,'yaml')); write(layout.APPROVALS,'[]\n')
 def load_project(): return load_mapping(layout.PROJECT)
 def activate(contract_file:Path):
+    adoption_state = contract_file.expanduser().resolve().parent / "project_state.yaml"
+    if adoption_state.is_file():
+        candidate = load_mapping(adoption_state)
+        if candidate.get("status") in {"INSTALLED_NOT_ACTIVATED", "ACTIVATED_NOT_PREFLIGHTED"}:
+            raise ValueError("USE_ACTIVATE_APPROVED: legacy activate cannot activate Existing Project Adoption Runtime")
     value=load_mapping(contract_file); validate_mapping(value,'task_contract.schema.json')
     if layout.ACTIVE.exists(): raise ValueError('active task exists; deactivate first')
     write(layout.ACTIVE,dump_mapping(value,'yaml'))

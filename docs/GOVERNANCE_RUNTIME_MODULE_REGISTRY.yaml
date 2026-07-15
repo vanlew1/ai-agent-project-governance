@@ -196,3 +196,15 @@ modules:
     phase: AGC-UX-01
     public_entrypoints: [scripts/agent_audit.py, scripts/init_new_project.py]
     notes: The audit reads only bounded public governance documentation and filenames; it does not collect telemetry or project secrets.
+  adoption_planner:
+    owner: framework_maintainers
+    layer: adoption_experience
+    purpose: Build an untrusted, local-only existing-project adoption plan from adapter and audit evidence.
+    status: existing
+    paths: [governance/adoption/, scripts/agent_adopt.py, scripts/agent_state.py, schemas/adoption_plan.schema.json, schemas/adoption_confirmation.schema.json, schemas/adoption_final_approval.schema.json, schemas/adoption_installation_receipt.schema.json, schemas/adoption_rollback_approval.schema.json, schemas/runtime_artifact_manifest.schema.json, schemas/activation_approval.schema.json, schemas/activation_receipt.schema.json]
+    depends_on: [adapter_protocol, adoption_audit, schema_contracts]
+    must_not_depend_on: [network, secrets, production_data, governance/state/]
+    risk_level: medium
+    phase: AGC-UX-04B
+    public_entrypoints: [scripts/agent_adopt.py]
+    notes: Dry-run planning and explicit draft export only; neither writes the scanned project nor authorizes copying assets, formal configuration, state activation, tests, or external access.

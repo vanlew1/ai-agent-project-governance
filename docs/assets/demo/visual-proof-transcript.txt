@@ -1,0 +1,44 @@
+AGC UX Demo: real local visual proof
+Environment: Windows PowerShell uses python; Linux, WSL, and macOS use python3.
+Default mode writes only to a new temporary output directory; --publish-assets is maintainer-only.
+
+[1] Out-of-scope change is blocked
+command: Guard check
+guard_exit_code: 3
+guard_status: BLOCKED
+status: BLOCKED
+denied_changes: [restricted-change.txt]
+
+[2] Stale verification cannot close
+command: Test + stale closure
+guard_exit_code: 0
+guard_status: PASS
+test_command: <current-python> -m unittest discover -s tests
+test_exit_code: 0
+test_status: PASS
+test_summary: .
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+closure_exit_code: 3
+verification: VERIFIED
+status: BLOCKED
+reasons: ['verification_stale_after_workspace_change']
+
+[3] Fresh verification closes the task
+command: Test + fresh closure
+guard_exit_code: 0
+guard_status: PASS
+test_command: <current-python> -m unittest discover -s tests
+test_exit_code: 0
+test_status: PASS
+test_summary: .
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK
+closure_exit_code: 0
+verification: VERIFIED
+status: CLOSED
+fresh evidence accepted

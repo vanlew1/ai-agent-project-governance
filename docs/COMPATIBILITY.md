@@ -21,4 +21,4 @@
 | Cursor | Not yet tested | No recorded end-to-end case. |
 | GitHub Copilot | Not yet tested | No recorded end-to-end case. |
 
-No remote CI status is claimed: the public repository has no workflow file or published release associated with this local checkout.
+The repository has a GitHub Actions workflow named `Governance CI` and a `v1.0.0` Release. This document does not claim a live remote-CI result for the current `main` branch; any test result recorded in a Release is historical evidence for that Release.

@@ -1,6 +1,6 @@
 # Agent Governance Runtime
 
-> 面向 AI 编码 Agent 的本地确定性治理运行时。
+> 面向 AI 编码 Agent 的本地确定性治理运行时：帮助变更保持在授权范围内、执行恰当检查，并留下可验证的收口证据。
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -8,18 +8,24 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-它不是提示词集合：它检查范围、必跑测试、验证、收口和多 Agent 写入归属。
+## 它解决什么问题
 
-> 公开仓库当前没有已发布 Release 或 Actions workflow，因此不展示虚假的 Release 或 CI 通过徽章。请查看 [仓库设置清单](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md)。
+让 Agent 改动仓库时，难点往往不在生成代码，而在于：变更是否越界、测试是否真正相关、是否在未验证时宣称完成、多人协作会不会冲突，以及结果能否被后续交接追溯。
 
-## 它能阻止什么
+这个仓库为这些问题提供本地治理运行时：
 
-- TaskContract 之外的文件修改。
-- 未跑必跑测试就声称完成。
-- Verification 后工作区变化却沿用旧验证收口。
-- 多个 Agent 无单写者保护地并行写同一文件。
+- 明确任务范围和受保护路径；
+- 按任务选择测试并保存验证证据；
+- 在验证过期时阻止错误收口；
+- 为多 Agent 协作提供结构化交接和单写者保护。
 
-## 五分钟开始
+### 不只是 `AGENTS.md` 或 Prompt
+
+`AGENTS.md` 或 Prompt 可以指导 Agent；本项目在此基础上提供可执行检查：合同、范围 Guard、测试规划、验证和收口记录。它用于降低常见失误，不宣称能够完全避免所有 Agent 错误，也不代表与第三方产品存在官方集成。
+
+## 本地快速验证
+
+克隆仓库后，运行现有的本地检查入口：
 
 ```powershell
 git clone https://github.com/vanlew1/ai-agent-project-governance.git
@@ -28,26 +34,53 @@ python -m pip install -r requirements-governance.txt
 python scripts/run_governance_ci.py
 ```
 
+最后一条命令会运行仓库已有的治理检查，并在终端输出结果。
+
+## 当前状态与默认边界
+
+| 项目 | 当前且谨慎的说明 |
+| --- | --- |
+| 版本 | `1.0.0` |
+| 自动化 | 仓库包含名为 `Governance CI` 的 GitHub Actions workflow。 |
+| Release | 已有 `v1.0.0` Release；其中的测试产物属于历史记录，不代表当前 `main` 的实时状态。 |
+| 运行时覆盖 | Python、Node.js、微信小程序和通用 fallback 均有本地 Adapter 验收证据。详见[兼容性](docs/COMPATIBILITY.md)。 |
+| Agent 兼容性 | Codex 仅为 instruction-compatible；Claude Code、Cursor 和 GitHub Copilot 尚无已记录的端到端验证。 |
+
+默认情况下，运行时不会自动访问生产系统、写入生产数据、调用远端 API、启动第三方 Agent、安装依赖、创建 worktree、提交、推送、部署或发布。本地 audit 除非显式传入 `--output`，否则为只读。
+
+## 它帮助避免什么
+
+- 修改 TaskContract 范围外的文件。
+- 执行与变更无关的测试，或跳过必跑检查。
+- 没有验证证据就宣称完成。
+- 工作区变化后仍复用旧验证进行收口。
+- 多个 Agent 缺少单写者保护地修改同一文件。
+
 ## 如何工作
 
 ![治理运行时架构](docs/assets/architecture-overview.svg)
 
-| 静态 Agent 说明 | Governance Runtime |
+| 仅有静态说明 | 本治理运行时增加 |
 | --- | --- |
-| 告诉 Agent 不要越界 | Guard 检查实际范围 |
+| 告诉 Agent 不要修改什么 | Guard 检查实际变更范围 |
 | 要求 Agent 跑测试 | TestPlan 选择已登记命令 |
-| 依赖完成声明 | Verification 与 Closure 决定完成 |
-| 自然语言交接 | 结构化 Handoff |
-| 人工协调 | DAG 与单写者保护 |
-| 可复用旧验证 | 工作区变化阻止 Closure |
+| 依赖完成声明 | Verification 与 Closure 决定是否完成 |
+| 用自然语言交接 | Structured Handoff 记录归属和结果 |
+| 人工协调 | DAG 与单写者保护暴露冲突 |
 
-[Quickstart](docs/QUICKSTART.md) · [Demo](docs/DEMO.md) · [示例](examples/README.md) · [接入已有项目](docs/EXISTING_PROJECT_ADOPTION.md) · [兼容性](docs/COMPATIBILITY.md)
+## 按你的目标继续阅读
 
-运行时不会自动启动 Agent、创建 worktree、访问远端 API、安装依赖、提交、推送、部署或发布。
+| 如果你想… | 从这里开始 |
+| --- | --- |
+| 快速了解本地使用方式 | [入门指南](docs/GETTING_STARTED.md) 与 [Quickstart](docs/QUICKSTART.md) |
+| 选择接入级别 | [Preset 指南](docs/PRESETS.md) |
+| 在已有仓库接入运行时 | [已有项目接入](docs/EXISTING_PROJECT_ADOPTION.md) |
+| 查看兼容性证据 | [兼容性](docs/COMPATIBILITY.md) |
+| 了解 audit 与安全模型 | [Audit 说明](docs/ADOPTION_AUDIT.md) |
+| 查看具体路径 | [Demo](docs/DEMO.md)：查看越界阻断、过期验证阻断与成功收口；另见 [示例](examples/README.md) |
+| 贡献或获取帮助 | [贡献](CONTRIBUTING.md)、[安全](SECURITY.md) 与 [支持](SUPPORT.md) |
 
-## 社区
-
-[贡献](CONTRIBUTING.md) · [安全](SECURITY.md) · [支持](SUPPORT.md) · [路线图](docs/OPEN_SOURCE_ROADMAP.md)
+如需检查仓库维护项，请查看 [GitHub 仓库设置清单](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md)。运行时本身不会修改这些远端设置。
 
 ## 许可证
 

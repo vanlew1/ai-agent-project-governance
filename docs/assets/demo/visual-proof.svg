@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-labelledby="title description">
+<title id="title">AGC UX Demo local governance proof</title>
+<desc id="description">Three synthetic local scenarios: an out-of-scope change is blocked, stale verification is blocked, and fresh verification closes successfully.</desc>
+<rect width="100%" height="100%" rx="16" fill="#111827"/>
+<style>.heading{font:700 25px ui-sans-serif,system-ui,sans-serif;fill:#f9fafb}.title{font:700 20px ui-sans-serif,system-ui,sans-serif;fill:#f9fafb}.body{font:18px ui-sans-serif,system-ui,sans-serif;fill:#d1d5db}.status{font:700 20px ui-sans-serif,system-ui,sans-serif}.reason{font:17px ui-sans-serif,system-ui,sans-serif;fill:#d1d5db}</style>
+<text class="heading" x="24" y="52">Local governance proof</text>
+<text class="body" x="24" y="78">Synthetic, offline, and generated from local commands.</text>
+<rect x="20" y="96" width="560" height="134" rx="12" fill="#1f2937"/>
+<text class="title" x="44" y="132">Out-of-scope change is blocked</text>
+<text class="body" x="44" y="162">Command: Guard check</text>
+<text class="body" x="44" y="190">Exit: 3 · Status:</text>
+<text class="status" x="260" y="190" fill="#fecaca">BLOCKED</text>
+<text class="reason" x="44" y="216">denied_changes: [restricted-change.txt]</text>
+<rect x="20" y="254" width="560" height="134" rx="12" fill="#1f2937"/>
+<text class="title" x="44" y="290">Stale verification cannot close</text>
+<text class="body" x="44" y="320">Command: Test + stale closure</text>
+<text class="body" x="44" y="348">Exit: 3 · Status:</text>
+<text class="status" x="260" y="348" fill="#fecaca">BLOCKED</text>
+<text class="reason" x="44" y="374">reasons: [&#x27;verification_stale_after_workspace_change&#x27;]</text>
+<rect x="20" y="412" width="560" height="134" rx="12" fill="#1f2937"/>
+<text class="title" x="44" y="448">Fresh verification closes the task</text>
+<text class="body" x="44" y="478">Command: Test + fresh closure</text>
+<text class="body" x="44" y="506">Exit: 0 · Status:</text>
+<text class="status" x="260" y="506" fill="#bbf7d0">CLOSED</text>
+<text class="reason" x="44" y="532">fresh evidence accepted</text>
+</svg>

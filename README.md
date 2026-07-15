@@ -1,6 +1,6 @@
 # Agent Governance for Coding Agents
 
-> Scoped, testable, traceable, and cost-aware local governance for Codex, Claude Code, Cursor, and similar coding agents.
+> A local, deterministic governance runtime that helps coding agents stay in scope, run the right checks, and leave verifiable closure evidence.
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -8,35 +8,24 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-## Start safely
+## Why this exists
 
-In a few minutes, you can limit an agent's change scope, select task-relevant tests, and keep a traceable implementation result.
+When agents change a repository, the difficult part is often not generating code. It is keeping the change inside its intended scope, selecting meaningful tests, avoiding unsupported completion claims, coordinating concurrent work, and retaining evidence for handoff.
 
-```bash
-python scripts/agent_audit.py --project-root .
-python scripts/init_new_project.py --preset lightweight
-```
+This repository provides a local governance runtime for that work:
 
-| Before | After |
-| --- | --- |
-| An agent receives broad instructions and guesses what to validate. | A project has explicit scope, focused tests, and a short closure record. |
+- explicit task scope and protected paths;
+- task-relevant test planning and verification evidence;
+- closure that detects stale validation; and
+- structured handoff with single-writer protection for multi-agent work.
 
-Everything runs locally by default. The audit is read-only unless you explicitly pass `--output`; there is no telemetry, no automatic network, production-system, or Git-remote access.
+### More than an `AGENTS.md` or prompt
 
-New here? Read [Getting started](docs/GETTING_STARTED.md), [audit details](docs/ADOPTION_AUDIT.md), [preset guide](docs/PRESETS.md), and [synthetic examples](docs/examples/README.md).
+An `AGENTS.md` file or prompt can guide an agent. This project adds executable checks around that guidance: contracts, scope guards, test planning, verification, and closure records. It reduces common failure modes; it does not claim to prevent every agent error or provide an official third-party product integration.
 
-This is not a prompt collection: it checks scope, registered tests, verification, closure, and multi-agent ownership.
+## Verify it locally
 
-> The public repository currently has no published release or Actions workflow, so release/CI success badges are intentionally absent. See the [settings checklist](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md).
-
-## What it prevents
-
-- Changes outside a TaskContract scope.
-- Claims of completion without required tests.
-- Closure using stale verification after workspace changes.
-- Parallel workers writing one file without single-writer protection.
-
-## 5-minute quickstart
+Run the existing local gate after cloning the repository:
 
 ```powershell
 git clone https://github.com/vanlew1/ai-agent-project-governance.git
@@ -45,26 +34,54 @@ python -m pip install -r requirements-governance.txt
 python scripts/run_governance_ci.py
 ```
 
+The final command runs the repository's existing governance checks and reports the result in the terminal.
+
+## Status and boundaries at a glance
+
+| Area | Current, cautious statement |
+| --- | --- |
+| Version | `1.0.0` |
+| Automation | The repository includes the `Governance CI` GitHub Actions workflow. |
+| Release | A `v1.0.0` Release exists; its test artifacts are historical and do not state the live status of current `main`. |
+| Runtime coverage | Python, Node.js, WeChat Mini Program, and the generic fallback have local adapter acceptance evidence. See [compatibility](docs/COMPATIBILITY.md). |
+| Agent compatibility | Codex is instruction-compatible only. Claude Code, Cursor, and GitHub Copilot have no recorded end-to-end validation. |
+
+By default, the runtime does not automatically access production systems, write production data, call remote APIs, start third-party agents, install dependencies, create worktrees, commit, push, deploy, or publish. The local audit is read-only unless you explicitly pass `--output`.
+
+## What it helps prevent
+
+- Changes outside a TaskContract scope.
+- Tests that are unrelated to the change, or skipped required checks.
+- Claims of completion without verification evidence.
+- Closure that reuses validation after the workspace has changed.
+- Multiple agents writing the same file without single-writer protection.
+
 ## How it works
 
 ![Governance runtime architecture](docs/assets/architecture-overview.svg)
 
-| Static instructions | Governance Runtime |
+| Static guidance alone | This governance runtime adds |
 | --- | --- |
-| Tells agents not to exceed scope | Guard checks actual scope |
-| Asks agents to run tests | TestPlan selects registered commands |
-| Relies on completion claims | Verification and Closure decide completion |
-| Natural-language handoff | Structured Handoff |
-| Manual coordination | DAG and single-writer protection |
-| Stale validation may be reused | Workspace changes block Closure |
+| Tells an agent what not to change | Guard checks the actual change scope |
+| Asks an agent to run tests | TestPlan selects registered commands |
+| Relies on a completion claim | Verification and Closure decide completion |
+| Leaves handoff in prose | Structured Handoff records ownership and results |
+| Coordinates manually | DAG and single-writer protection expose conflicts |
 
-[Quickstart](docs/QUICKSTART.md) · [Demo](docs/DEMO.md) · [Examples](examples/README.md) · [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) · [Compatibility](docs/COMPATIBILITY.md)
+## Continue by intent
 
-The runtime does not start agents, create worktrees, call remote APIs, install dependencies, commit, push, deploy, or publish automatically.
+| If you want to… | Start here |
+| --- | --- |
+| Run a short local introduction | [Getting started](docs/GETTING_STARTED.md) and [Quickstart](docs/QUICKSTART.md) |
+| Choose a setup level | [Preset guide](docs/PRESETS.md) |
+| Adopt the runtime in an existing repository | [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) — use `agent_adopt.py --help` for the complete local-only dry-run/export/compile/install/recovery command surface |
+| Activate an adopted Runtime | Use `scripts/agent_state.py activate-approved`; activation is separately approved and does not run Preflight, tests, verification, or closure |
+| Review compatibility evidence | [Compatibility](docs/COMPATIBILITY.md) |
+| Understand the audit and safety model | [Audit details](docs/ADOPTION_AUDIT.md) |
+| Explore a concrete path | [Demo](docs/DEMO.md) — see an out-of-scope block, stale-verification block, and successful closure — plus [examples](examples/README.md) |
+| Contribute or get help | [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and [Support](SUPPORT.md) |
 
-## Community
-
-[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Support](SUPPORT.md) · [Roadmap](docs/OPEN_SOURCE_ROADMAP.md)
+For repository-maintenance checks, see the [GitHub settings checklist](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md). The runtime itself does not modify those remote settings.
 
 ## License
 

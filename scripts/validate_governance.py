@@ -88,8 +88,8 @@ def validate_schemas(root: Path, errors: list[str]) -> dict[str, dict[str, Any]]
             errors.append(f"Cannot load schema {path.relative_to(root)}: {exc}")
         except Exception as exc:
             errors.append(f"Invalid schema {path.relative_to(root)}: {exc}")
-    if len(schemas) != 22:
-        errors.append(f"Expected 22 schemas, found {len(schemas)}")
+    if len(schemas) != 32:
+        errors.append(f"Expected 31 schemas, found {len(schemas)}")
     return schemas
 
 
@@ -146,7 +146,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-    print("Governance baseline validation: PASS (22 schemas, rules index, module registry, references)")
+    print("Governance baseline validation: PASS (32 schemas, rules index, module registry, references)")
     return 0
 
 

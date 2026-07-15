@@ -1,17 +1,55 @@
-# Demo
+# Local visual proof
 
-Three isolated temporary-directory scenarios demonstrate deterministic blocks:
+This offline walkthrough shows a small governance loop with real local commands and a disposable synthetic repository:
 
-1. Contract allows `src/` only; `secrets/token.txt` makes Guard `BLOCKED`.
-2. A workspace change after `VERIFIED` makes Closure `BLOCKED` with `verification_stale_after_workspace_change`.
-3. Two parallel subtasks claiming `src/shared.py` make OrchestrationPlan `BLOCKED`.
+```text
+risky action → governance block → clear reason → compliant correction → test → verified closure
+```
 
-See [assets/demo-terminal.txt](assets/demo-terminal.txt).
+![Terminal evidence for the three local scenarios](assets/demo/visual-proof.svg)
 
-## Record a 30–60 second GIF
+The image is a concise status view. Its [plain-text transcript](assets/demo/visual-proof-transcript.txt) preserves the commands, real exit codes, and sanitized test summaries; the [status summary](assets/demo/visual-proof-summary.json) is machine-readable.
 
-1. Open an empty temporary directory and enlarge terminal text.
-2. Run the three scenarios from `assets/demo-terminal.txt`, pausing after each `BLOCKED`.
-3. Record only fictional paths; never show credentials or unrelated output.
-4. Trim to 30–60 seconds and export an optimized GIF.
-5. Check for local paths and sensitive material before saving under `docs/assets/`.
+## Run it yourself without changing the repository
+
+Run the command from the repository root. The default mode creates a new temporary output directory, prints its path, and leaves repository assets unchanged.
+
+Windows PowerShell:
+
+```powershell
+python examples/demo/run_visual_proof.py
+```
+
+Linux, WSL, and macOS:
+
+```bash
+python3 examples/demo/run_visual_proof.py
+```
+
+The three temporary synthetic Git repositories are deleted automatically after the runner collects evidence. The temporary output directory is retained so you can inspect its SVG, transcript, and JSON files.
+
+## Maintainer-only asset refresh
+
+Only maintainers intentionally refreshing the checked-in preview should run:
+
+```bash
+python3 examples/demo/run_visual_proof.py --publish-assets
+```
+
+`--publish-assets` is the only mode that writes `docs/assets/demo/`. Default mode and `--output-dir` reject repository-local output paths.
+
+## What the three scenarios prove
+
+| Scenario | Local action | Real outcome |
+| --- | --- | --- |
+| 1. Scope block | A task permits `src/` but changes synthetic `restricted-change.txt`. | Guard returns `BLOCKED` with exit code `3` and names the denied path. |
+| 2. Stale verification | Guard passes, the focused synthetic unit test passes, then the workspace changes before closure. | Verification receives that real Guard/test evidence; Closure receives the observed stale condition and returns `BLOCKED` with exit code `3`. |
+| 3. Fresh closure | Guard passes and the focused synthetic unit test passes against the allowed change. | Verification is `VERIFIED`; Closure is `CLOSED` with exit code `0`. |
+
+Scenario 2 is deliberately narrow: it calls the existing closure evaluator with an explicit, observed `stale=True` condition after the synthetic workspace changes. It does not claim universal automatic workspace-change detection.
+
+## Evidence and limits
+
+Public assets use placeholders instead of local paths and contain no usernames, hostnames, credentials, access values, or external URLs. They are generated from local subprocess exit codes and sanitized output summaries; the sanitization does not alter a Guard, test, Verification, or Closure status.
+
+This is a synthetic local demonstration, not evidence from a customer or deployed environment, and it does not claim third-party coding-agent certification.
