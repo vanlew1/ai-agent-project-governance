@@ -1,12 +1,41 @@
 # Agent Governance for Coding Agents
 
-> A local, deterministic governance runtime that helps coding agents stay in scope, run the right checks, and leave verifiable closure evidence.
+> A deterministic scope, evidence, and closure layer for AI coding-agent workflows.
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
+
+## Keep an AI coding task bounded and provable
+
+Planning and coding workflows can help an agent decide what to build. This project independently checks whether the resulting work stayed in scope, used relevant evidence, and can safely close.
+
+It is for the moments when an agent:
+
+- edits a file outside the authorized TaskContract;
+- runs an unrelated or missing test;
+- reuses verification after the workspace changed; or
+- reports completion without an evidence-backed handoff.
+
+Run the offline proof now:
+
+```bash
+python3 examples/demo/run_visual_proof.py
+```
+
+On Windows PowerShell, use `python` instead. The command creates only a temporary synthetic repository and demonstrates an out-of-scope block, a stale-verification block, and a successful closure. See the [Demo](docs/DEMO.md).
+
+## Where it fits
+
+This is not a replacement for [Superpowers](docs/SUPERPOWERS_COMPATIBILITY.md), `AGENTS.md`, TDD practices, a general development methodology, or a sub-agent orchestrator.
+
+| Upper workflow layer | This governance layer |
+| --- | --- |
+| Clarifies requirements, designs work, plans implementation, and may coordinate agents | Maps a bounded task to a TaskContract, checks actual scope, records test evidence, rejects stale verification, and produces Closure/Handoff records |
+
+The relationship is complementary and workflow-agnostic. The repository provides a documented, offline mapping example; it does **not** claim an official Superpowers integration, a plugin, or end-to-end compatibility. See the [compatibility statement](docs/SUPERPOWERS_COMPATIBILITY.md) and [minimal workflow mapping](docs/WORKFLOW_INTEGRATION.md).
 
 ## Why this exists
 
@@ -40,7 +69,7 @@ The final command runs the repository's existing governance checks and reports t
 
 | Area | Current, cautious statement |
 | --- | --- |
-| Version | `1.0.0` |
+| Version | `1.1.0` |
 | Automation | The repository includes the `Governance CI` GitHub Actions workflow. |
 | Release | A `v1.0.0` Release exists; its test artifacts are historical and do not state the live status of current `main`. |
 | Runtime coverage | Python, Node.js, WeChat Mini Program, and the generic fallback have local adapter acceptance evidence. See [compatibility](docs/COMPATIBILITY.md). |
@@ -72,13 +101,15 @@ By default, the runtime does not automatically access production systems, write 
 
 | If you want to… | Start here |
 | --- | --- |
-| Run a short local introduction | [Getting started](docs/GETTING_STARTED.md) and [Quickstart](docs/QUICKSTART.md) |
+| Run a short local introduction | [Demo](docs/DEMO.md), then [Getting started](docs/GETTING_STARTED.md) |
 | Choose a setup level | [Preset guide](docs/PRESETS.md) |
-| Adopt the runtime in an existing repository | [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) — use `agent_adopt.py --help` for the complete local-only dry-run/export/compile/install/recovery command surface |
+| Adopt the runtime in an existing repository | [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) — the `agent_adopt.py` lifecycle is the recommended path; manual copying is recovery-only |
 | Activate an adopted Runtime | Use `scripts/agent_state.py activate-approved`; activation is separately approved and does not run Preflight, tests, verification, or closure |
 | Review compatibility evidence | [Compatibility](docs/COMPATIBILITY.md) |
 | Understand the audit and safety model | [Audit details](docs/ADOPTION_AUDIT.md) |
 | Explore a concrete path | [Demo](docs/DEMO.md) — see an out-of-scope block, stale-verification block, and successful closure — plus [examples](examples/README.md) |
+| Reuse an upper workflow plan | [Workflow integration](docs/WORKFLOW_INTEGRATION.md) and the [offline mapping example](examples/superpowers_compat/README.md) |
+| Prepare a public launch | [Share kit](docs/SHARE_KIT.md), [launch copy](docs/LAUNCH_COPY.md), and [repository metadata](docs/GITHUB_TOPICS.md) |
 | Contribute or get help | [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and [Support](SUPPORT.md) |
 
 For repository-maintenance checks, see the [GitHub settings checklist](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md). The runtime itself does not modify those remote settings.

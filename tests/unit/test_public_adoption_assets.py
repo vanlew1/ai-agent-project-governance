@@ -12,7 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_DOCS = (
     ROOT / "README.md", ROOT / "README.zh-CN.md", ROOT / "docs" / "GETTING_STARTED.md",
     ROOT / "docs" / "ADOPTION_AUDIT.md", ROOT / "docs" / "PRESETS.md", ROOT / "docs" / "DEMO.md",
-    ROOT / "docs" / "examples" / "README.md",
+    ROOT / "docs" / "examples" / "README.md", ROOT / "docs" / "SUPERPOWERS_COMPATIBILITY.md",
+    ROOT / "docs" / "WORKFLOW_INTEGRATION.md", ROOT / "docs" / "CASE_STUDY_WORKFLOW_GOVERNANCE.md",
+    ROOT / "docs" / "SHARE_KIT.md", ROOT / "docs" / "LAUNCH_COPY.md", ROOT / "docs" / "GITHUB_TOPICS.md",
 )
 BAD_FRAGMENTS = ("\ufffd", "Ã", "Â", "â€", "ðŸ")
 
@@ -53,6 +55,17 @@ class PublicAdoptionAssetsTest(unittest.TestCase):
         )
         for relative in required:
             self.assertTrue((ROOT / relative).is_file(), relative)
+
+    def test_public_positioning_is_workflow_agnostic_and_not_an_integration_claim(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        compatibility = (ROOT / "docs" / "SUPERPOWERS_COMPATIBILITY.md").read_text(encoding="utf-8")
+        example = ROOT / "examples" / "superpowers_compat"
+        self.assertIn("deterministic scope, evidence, and closure layer", readme)
+        self.assertIn("not a replacement", readme)
+        self.assertIn("does **not** include a Superpowers plugin", compatibility)
+        self.assertTrue((example / "upper-plan.md").is_file())
+        self.assertTrue((example / "task-contract.yaml").is_file())
+        self.assertTrue((example / "expected-output.json").is_file())
 
 
 if __name__ == "__main__":

@@ -1,12 +1,41 @@
 # Agent Governance Runtime
 
-> 面向 AI 编码 Agent 的本地确定性治理运行时：帮助变更保持在授权范围内、执行恰当检查，并留下可验证的收口证据。
+> 面向 AI 编码 Agent 工作流的确定性范围控制、证据验证与任务收口层。
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
+
+## 让 AI 编码任务可控、可验证、可收口
+
+上层工作流可以帮助 Agent 澄清需求、设计和施工；本项目独立检查实际改动是否越界、证据是否有效、任务是否可以收口。
+
+它重点处理以下失控情形：
+
+- 修改 TaskContract 授权范围之外的文件；
+- 没有运行相关测试，或测试与改动无关；
+- 工作区已变化却复用旧验证；
+- 没有证据就宣称完成或交接。
+
+最快体验方式：
+
+```bash
+python3 examples/demo/run_visual_proof.py
+```
+
+Windows PowerShell 请使用 `python`。该命令只创建临时合成仓库，展示越界阻断、过期验证阻断与成功收口；详见 [Demo](docs/DEMO.md)。
+
+## 它在工作流中的位置
+
+它不是 [Superpowers](docs/SUPERPOWERS_COMPATIBILITY.md)、`AGENTS.md`、TDD 实践、通用开发方法论或子 Agent 编排器的替代品。
+
+| 上层工作流 | 本项目的治理层 |
+| --- | --- |
+| 澄清需求、设计、制定计划，并可协调 Agent | 将受限任务映射为 TaskContract，检查实际范围，登记测试证据，拒绝过期验证，生成 Closure/Handoff |
+
+两者互补，且本项目不绑定任何特定工作流。仓库提供离线文档映射示例；不宣称 Superpowers 官方集成、插件或端到端兼容。见 [兼容性说明](docs/SUPERPOWERS_COMPATIBILITY.md) 与[最小工作流映射](docs/WORKFLOW_INTEGRATION.md)。
 
 ## 它解决什么问题
 
@@ -40,7 +69,7 @@ python scripts/run_governance_ci.py
 
 | 项目 | 当前且谨慎的说明 |
 | --- | --- |
-| 版本 | `1.0.0` |
+| 版本 | `1.1.0` |
 | 自动化 | 仓库包含名为 `Governance CI` 的 GitHub Actions workflow。 |
 | Release | 已有 `v1.0.0` Release；其中的测试产物属于历史记录，不代表当前 `main` 的实时状态。 |
 | 运行时覆盖 | Python、Node.js、微信小程序和通用 fallback 均有本地 Adapter 验收证据。详见[兼容性](docs/COMPATIBILITY.md)。 |
@@ -72,12 +101,14 @@ python scripts/run_governance_ci.py
 
 | 如果你想… | 从这里开始 |
 | --- | --- |
-| 快速了解本地使用方式 | [入门指南](docs/GETTING_STARTED.md) 与 [Quickstart](docs/QUICKSTART.md) |
+| 快速了解本地使用方式 | 先运行 [Demo](docs/DEMO.md)，再读[入门指南](docs/GETTING_STARTED.md) |
 | 选择接入级别 | [Preset 指南](docs/PRESETS.md) |
-| 在已有仓库接入运行时 | [已有项目接入](docs/EXISTING_PROJECT_ADOPTION.md) |
+| 在已有仓库接入运行时 | [已有项目接入](docs/EXISTING_PROJECT_ADOPTION.md)：`agent_adopt.py` 生命周期是推荐主路径，手动复制仅用于恢复 |
 | 查看兼容性证据 | [兼容性](docs/COMPATIBILITY.md) |
 | 了解 audit 与安全模型 | [Audit 说明](docs/ADOPTION_AUDIT.md) |
 | 查看具体路径 | [Demo](docs/DEMO.md)：查看越界阻断、过期验证阻断与成功收口；另见 [示例](examples/README.md) |
+| 复用上层工作流计划 | [工作流集成](docs/WORKFLOW_INTEGRATION.md) 与[离线映射示例](examples/superpowers_compat/README.md) |
+| 准备公开发布 | [传播素材](docs/SHARE_KIT.md)、[发布文案](docs/LAUNCH_COPY.md) 与[仓库元数据](docs/GITHUB_TOPICS.md) |
 | 贡献或获取帮助 | [贡献](CONTRIBUTING.md)、[安全](SECURITY.md) 与 [支持](SUPPORT.md) |
 
 如需检查仓库维护项，请查看 [GitHub 仓库设置清单](docs/GITHUB_REPOSITORY_SETTINGS_CHECKLIST.md)。运行时本身不会修改这些远端设置。

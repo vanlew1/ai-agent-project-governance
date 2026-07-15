@@ -5,7 +5,7 @@ Manual maintainer actions; this update does not call the GitHub API.
 **Description**
 
 ```text
-Deterministic local governance runtime for AI coding agents: scope guards, controlled tests, verified closure, adapters, CI, and multi-agent handoff.
+Deterministic scope, evidence, and closure for AI coding-agent workflows.
 ```
 
 **Topics**
@@ -17,10 +17,11 @@ agent-governance
 ai-agent-governance
 agents-md
 agent-instructions
-codex
-claude-code
-cursor
-github-copilot
+agent-safety
+agent-evaluation
+task-contract
+verification
+developer-productivity
 multi-agent
 developer-tools
 python

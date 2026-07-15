@@ -28,6 +28,8 @@ python3 examples/demo/run_visual_proof.py
 
 The three temporary synthetic Git repositories are deleted automatically after the runner collects evidence. The temporary output directory is retained so you can inspect its SVG, transcript, and JSON files.
 
+If your team already uses Superpowers or another planning workflow, keep using it for the upper-layer plan and map its bounded task into this runtime. The optional, offline [workflow mapping example](WORKFLOW_INTEGRATION.md) uses the same three proof paths; it does not require Superpowers to be installed.
+
 ## Maintainer-only asset refresh
 
 Only maintainers intentionally refreshing the checked-in preview should run:

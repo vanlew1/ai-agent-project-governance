@@ -17,6 +17,7 @@
 | Linux local CI | Tested | Fixed local gate. |
 | Windows local smoke | Tested | Unicode-path bootstrap check. |
 | Codex | Instruction-compatible | `AGENTS.md` guides a task; no product integration is claimed. |
+| Superpowers | Documented workflow mapping only | No official integration, plugin, installation requirement, or end-to-end compatibility claim. See [the mapping](SUPERPOWERS_COMPATIBILITY.md). |
 | Claude Code | Not yet tested | No recorded end-to-end case. |
 | Cursor | Not yet tested | No recorded end-to-end case. |
 | GitHub Copilot | Not yet tested | No recorded end-to-end case. |
