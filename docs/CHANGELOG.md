@@ -4,6 +4,10 @@
 
 ### Added
 
+- Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.
+
+- Added provenance-bound `activate-approved` for Existing Project Adoption. It can only transition an installed Runtime to `ACTIVATED_NOT_PREFLIGHTED`; it does not run Preflight, tests, verification, closure, network, Git, or production operations.
+
 - Added public-facing README files, Quickstart, adoption and demo guides, examples, community files, Issue/PR templates, compatibility evidence, and repository-settings checklist for GOV-OSS-GROWTH-01.
 
 - Added P2 local-state, approval-freshness, Guard baseline and acceptance tests; approval-to-Guard enforcement remains incomplete.
