@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_confirmation.schema.json",
+  "title": "Existing Project Adoption Draft Export Confirmation",
+  "description": "Explicit user confirmation bound to one untrusted existing-project adoption plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_digest", "confirmed_by_user", "preset", "scope", "test_selection", "autonomy", "blocked_decisions"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "plan_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "confirmed_by_user": {"const": true},
+    "preset": {"type": "object", "additionalProperties": false, "required": ["selected", "confirmed"], "properties": {"selected": {"enum": ["lightweight", "standard", "strict"]}, "confirmed": {"const": true}}},
+    "scope": {"type": "object", "additionalProperties": false, "required": ["allowed_paths", "denied_paths", "confirmed"], "properties": {"allowed_paths": {"type": "array", "items": {"type": "string"}}, "denied_paths": {"type": "array", "items": {"type": "string"}}, "confirmed": {"const": true}}},
+    "test_selection": {"type": "object", "additionalProperties": false, "required": ["candidate_id", "confirmed"], "properties": {"candidate_id": {"type": ["string", "null"]}, "confirmed": {"const": true}}},
+    "autonomy": {"type": "object", "additionalProperties": false, "required": ["level", "confirmed"], "properties": {"level": {"const": "constrained"}, "confirmed": {"const": true}}},
+    "blocked_decisions": {"type": "object", "additionalProperties": false, "required": ["production_data", "external_api", "git_write", "release", "state_activation", "security_bypass", "business_semantic_change"], "properties": {"production_data": {"const": "BLOCKED"}, "external_api": {"const": "BLOCKED"}, "git_write": {"const": "BLOCKED"}, "release": {"const": "BLOCKED"}, "state_activation": {"const": "BLOCKED"}, "security_bypass": {"const": "BLOCKED"}, "business_semantic_change": {"const": "BLOCKED"}}}
+  }
+}

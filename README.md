@@ -74,7 +74,8 @@ By default, the runtime does not automatically access production systems, write 
 | --- | --- |
 | Run a short local introduction | [Getting started](docs/GETTING_STARTED.md) and [Quickstart](docs/QUICKSTART.md) |
 | Choose a setup level | [Preset guide](docs/PRESETS.md) |
-| Adopt the runtime in an existing repository | [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) |
+| Adopt the runtime in an existing repository | [Existing-project adoption](docs/EXISTING_PROJECT_ADOPTION.md) — use `agent_adopt.py --help` for the complete local-only dry-run/export/compile/install/recovery command surface |
+| Activate an adopted Runtime | Use `scripts/agent_state.py activate-approved`; activation is separately approved and does not run Preflight, tests, verification, or closure |
 | Review compatibility evidence | [Compatibility](docs/COMPATIBILITY.md) |
 | Understand the audit and safety model | [Audit details](docs/ADOPTION_AUDIT.md) |
 | Explore a concrete path | [Demo](docs/DEMO.md) — see an out-of-scope block, stale-verification block, and successful closure — plus [examples](examples/README.md) |

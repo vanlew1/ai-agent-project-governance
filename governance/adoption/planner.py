@@ -1,6 +1,8 @@
 """Assemble a safe, local-only adoption plan without changing the target project."""
 from __future__ import annotations
 
+import json
+import unicodedata
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -94,8 +96,9 @@ def _marker_evidence(detection: Any, adapter_id: str) -> list[str]:
     return []
 
 
-def _candidate(command: str, evidence: list[str], confidence: str, scope: str) -> dict[str, object]:
+def _candidate(candidate_id: str, command: str, evidence: list[str], confidence: str, scope: str) -> dict[str, object]:
     return {
+        "candidate_id": candidate_id,
         "command": command,
         "evidence": evidence,
         "confidence": confidence,
@@ -111,12 +114,51 @@ def _test_candidates(root: Path, detection: Any) -> list[dict[str, object]]:
     adapters = set(detection.detected_adapters)
     if "python" in adapters and (root / "tests").is_dir():
         evidence = _marker_evidence(detection, "python") + ["tests/"]
-        candidates.append(_candidate("python3 -m unittest discover -s tests", evidence, "medium", "Python tests below tests/"))
+        candidates.append(_candidate("python-project-tests", "python3 -m unittest discover -s tests", evidence, "medium", "Python tests below tests/"))
     node = get("node")
     if node and ("node" in adapters or "wechat_miniprogram" in adapters) and "test" in node.package_scripts(root):
         evidence = _marker_evidence(detection, "node") + ["package.json:scripts.test"]
-        candidates.append(_candidate("npm test", evidence, "high", "Project package.json test script"))
+        candidates.append(_candidate("node-package-test", "npm test", evidence, "high", "Project package.json test script"))
+    if not candidates:
+        candidates.append(_candidate("generic-python-smoke", "python3 -c pass", ["generic local smoke"], "medium", "No project-specific test runner detected"))
     return candidates
+
+
+IDENTITY_MARKERS = ("pyproject.toml", "package.json", "requirements.txt", "go.mod", "Cargo.toml", "Makefile")
+
+
+def target_identity(project_root: Path) -> dict[str, object]:
+    """Return a privacy-preserving, stable identity for one local target project."""
+    root = project_root.expanduser().resolve(strict=True)
+    marker_rows = []
+    for name in IDENTITY_MARKERS:
+        marker = root / name
+        if marker.is_file():
+            marker_rows.append({"name": name, "sha256": sha256(marker.read_bytes()).hexdigest()})
+    canonical_root_fingerprint = sha256(str(root).encode("utf-8")).hexdigest()
+    project_markers_digest = sha256(json.dumps(marker_rows, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    value = {
+        "canonical_root_fingerprint": canonical_root_fingerprint,
+        "project_markers_digest": project_markers_digest,
+        "git_repository": (root / ".git").exists(),
+    }
+    value["identity_digest"] = sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return value
+
+
+def validate_unique_candidate_ids(candidates: list[dict[str, object]]) -> None:
+    """Reject ambiguous identifiers after normalization, before any export can occur."""
+    seen: set[str] = set()
+    for candidate in candidates:
+        raw = candidate.get("candidate_id")
+        if not isinstance(raw, str) or not raw:
+            raise ValueError("test candidate ID must be a non-empty string")
+        normalized = unicodedata.normalize("NFC", raw).strip().casefold()
+        if not normalized or normalized in seen:
+            raise ValueError("duplicate test candidate ID")
+        seen.add(normalized)
 
 
 def _audit_mapping(root: Path) -> dict[str, object]:
@@ -177,6 +219,16 @@ def _task_draft() -> dict[str, object]:
         "test_command": "UNRESOLVED",
         "note": "This is not a valid or authorized task.yaml. Review every field before creating a file.",
     }
+
+
+def _scope_candidates(task_draft: dict[str, object]) -> list[dict[str, object]]:
+    """Expose reviewable scope choices without treating them as authorization."""
+    return [{
+        "candidate_id": "scope-default",
+        "allowed_paths": list(task_draft["write_scope"]["allow"]),
+        "denied_paths": list(task_draft["write_scope"]["deny"]),
+        "requires_confirmation": True,
+    }]
 
 
 def _project_state_draft() -> dict[str, object]:
@@ -243,12 +295,15 @@ def build_plan(project_root: Path) -> dict[str, object]:
     detection, adapter = _adapter_mapping(root)
     audit = _audit_mapping(root)
     candidates = _test_candidates(root, detection)
+    validate_unique_candidate_ids(candidates)
     manifest = _asset_manifest(root)
+    task_draft = _task_draft()
     value: dict[str, object] = {
         "schema_version": "1.0",
         "mode": "dry-run",
         "project_root": "<target-project>",
         "read_only": True,
+        "target_identity": target_identity(root),
         "field_semantics": FIELD_SEMANTICS,
         "adapter": adapter,
         "audit": audit,
@@ -256,7 +311,8 @@ def build_plan(project_root: Path) -> dict[str, object]:
         "test_candidates": candidates,
         "asset_manifest": manifest,
         "conflicts": [item for item in manifest if item["conflict"]],
-        "task_draft": _task_draft(),
+        "task_draft": task_draft,
+        "scope_candidates": _scope_candidates(task_draft),
         "project_state_draft": _project_state_draft(),
         "required_confirmations": _confirmations(),
         "blocked_decisions": _blocked_decisions(),
@@ -269,5 +325,8 @@ def build_plan(project_root: Path) -> dict[str, object]:
         ],
         "warnings": _warnings(detection, candidates),
     }
+    value["plan_digest"] = sha256(
+        json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
     validate_mapping(value, "adoption_plan.schema.json")
     return value

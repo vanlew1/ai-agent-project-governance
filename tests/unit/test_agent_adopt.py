@@ -44,6 +44,9 @@ class AgentAdoptTest(unittest.TestCase):
         env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
         return subprocess.run([sys.executable, str(SCRIPT), "--project-root", str(root), *args, "dry-run"], cwd=ROOT, text=True, capture_output=True, check=False, env=env)
 
+    def adopt_cli(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([sys.executable, str(SCRIPT), *args], cwd=ROOT, text=True, capture_output=True, check=False, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+
     def assert_unchanged(self, root: Path, before: list[tuple[str, str]]) -> None:
         self.assertEqual(before, snapshot(root))
         self.assertFalse((root / ".agent_state").exists())
@@ -77,8 +80,8 @@ class AgentAdoptTest(unittest.TestCase):
             with patch.object(socket, "socket", side_effect=AssertionError("network is forbidden")):
                 plan = build_plan(root)
         self.assertEqual("generic", plan["adapter"]["primary_adapter"])
-        self.assertEqual([], plan["test_candidates"])
-        self.assertIn("No reliable test candidate", " ".join(plan["warnings"]))
+        self.assertEqual("generic-python-smoke", plan["test_candidates"][0]["candidate_id"])
+        self.assertIn("Adapter detection is low confidence", " ".join(plan["warnings"]))
         self.assertEqual("low", plan["preset_recommendation"]["confidence"])
 
     def test_manifest_reports_create_same_and_different_without_copying(self) -> None:
@@ -147,6 +150,41 @@ class AgentAdoptTest(unittest.TestCase):
         self.assertIn("## Forbidden automatic decisions", markdown)
         self.assertIn("not authorization", markdown)
         self.assertIn("absolute paths are intentionally hidden", markdown)
+
+    def test_agent_adopt_top_level_help_lists_all_commands(self) -> None:
+        result = self.adopt_cli("--help")
+        self.assertEqual(0, result.returncode, result.stderr)
+        for command in ("dry-run", "export-drafts", "compile-runtime-artifacts", "install-approved", "assess-rollback", "rollback-install"):
+            self.assertIn(command, result.stdout)
+        self.assertNotIn("TOKEN=", result.stdout + result.stderr)
+
+    def test_agent_adopt_help_matches_dispatcher_commands(self) -> None:
+        result = self.adopt_cli("--help")
+        self.assertEqual(0, result.returncode, result.stderr)
+        declared = {"dry-run", "export-drafts", "compile-runtime-artifacts", "install-approved", "assess-rollback", "rollback-install"}
+        self.assertTrue(all(command in result.stdout for command in declared))
+
+    def test_agent_adopt_subcommand_help_lists_real_parameters_and_safety_boundaries(self) -> None:
+        expected = {
+            "dry-run": ("--project-root",),
+            "export-drafts": ("--plan", "--confirmations", "--output-dir", "--target-project-root"),
+            "compile-runtime-artifacts": ("--plan", "--confirmations", "--draft-bundle", "--output-dir", "--target-project-root"),
+            "install-approved": ("--plan", "--confirmations", "--runtime-artifact-bundle", "does not activate"),
+            "assess-rollback": ("--installation-receipt", "read-only"),
+            "rollback-install": ("--rollback-approval", "unsupported"),
+        }
+        for command, fragments in expected.items():
+            with self.subTest(command=command):
+                result = self.adopt_cli(command, "--help")
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertTrue(all(fragment in result.stdout for fragment in fragments), result.stdout)
+                self.assertNotIn("TOKEN=", result.stdout + result.stderr)
+
+    def test_agent_adopt_unknown_subcommand_fails_closed(self) -> None:
+        result = self.adopt_cli("unknown-command")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("invalid choice", result.stderr)
+        self.assertNotIn("TOKEN=", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":
