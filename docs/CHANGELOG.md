@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Renamed the public repository and product presentation to Coding Agent Governance; compatibility-facing schema identifiers and historical reports retain their original references.
+- Prepared the public product presentation as Coding Agent Governance; the current repository slug remains `ai-agent-project-governance` until an authenticated GitHub rename can complete.
 
 ### Added
 

@@ -2,7 +2,7 @@
 
 > A deterministic scope, evidence, and closure layer for AI coding-agent workflows.
 
-Formerly `ai-agent-project-governance`.
+Repository-slug migration from `ai-agent-project-governance` is pending.
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -59,8 +59,8 @@ An `AGENTS.md` file or prompt can guide an agent. This project adds executable c
 Run the existing local gate after cloning the repository:
 
 ```powershell
-git clone https://github.com/vanlew1/coding-agent-governance.git
-cd coding-agent-governance
+git clone https://github.com/vanlew1/ai-agent-project-governance.git
+cd ai-agent-project-governance
 python -m pip install -r requirements-governance.txt
 python scripts/run_governance_ci.py
 ```

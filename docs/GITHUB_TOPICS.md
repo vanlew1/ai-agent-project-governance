@@ -11,7 +11,7 @@ Deterministic scope, evidence, and closure for AI coding-agent workflows.
 **Homepage**
 
 ```text
-https://github.com/vanlew1/coding-agent-governance#readme
+https://github.com/vanlew1/ai-agent-project-governance#readme
 ```
 
 **Topics**
