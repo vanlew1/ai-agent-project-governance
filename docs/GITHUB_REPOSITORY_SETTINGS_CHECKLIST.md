@@ -35,7 +35,7 @@ local-first
 - [ ] Add the description and topics.
 - [ ] Pin the repository if desired.
 - [ ] Disable Wiki unless it has an owner.
-- [ ] Add and validate a least-privilege workflow before showing an Actions badge.
-- [ ] Publish the intended tag/release before showing a Release badge.
+- [x] A least-privilege workflow exists: `.github/workflows/governance-ci.yml`, named `Governance CI`.
+- [x] The `v1.0.0` Release exists.
 
-The repository was checked during this work: it has no published release and no workflow file in this checkout.
+Status recorded for this documentation update: the repository contains the `Governance CI` workflow and has a `v1.0.0` Release. This local update did not query GitHub; it does not treat Release test results as the live CI status of the current `main` branch.
