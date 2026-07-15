@@ -1,0 +1,81 @@
+{
+  "synthetic": true,
+  "scenarios": [
+    {
+      "id": "scope_blocked",
+      "title": "Out-of-scope change is blocked",
+      "command": "Guard check",
+      "guard": {
+        "exit_code": 3,
+        "status": "BLOCKED",
+        "summary": "denied_changes:\n- restricted-change.txt\nunmatched_changes: []\napproval_status: not_required\nstate_status: OK\nforbidden_operation_status: PASS\nreasons: []\nrun_at: '2026-07-15T09:55:48.901442+00:00'",
+        "evidence": "denied_changes: [restricted-change.txt]"
+      },
+      "test": null,
+      "closure": null,
+      "status": "BLOCKED",
+      "exit_code": 3,
+      "evidence": "denied_changes: [restricted-change.txt]"
+    },
+    {
+      "id": "stale_verification_blocked",
+      "title": "Stale verification cannot close",
+      "command": "Test + stale closure",
+      "guard": {
+        "exit_code": 0,
+        "status": "PASS",
+        "summary": "conditional_changes: []\ndenied_changes: []\nunmatched_changes: []\napproval_status: not_required\nstate_status: OK\nforbidden_operation_status: PASS\nreasons: []\nrun_at: '2026-07-15T09:55:49.150285+00:00'",
+        "evidence": "Guard completed."
+      },
+      "test": {
+        "command_id": "synthetic-unittest",
+        "command": "python -m unittest discover -s tests",
+        "status": "PASS",
+        "required": true,
+        "exit_code": 0,
+        "summary": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      },
+      "closure": {
+        "exit_code": 3,
+        "verification": "VERIFIED",
+        "closure": "BLOCKED",
+        "reasons": [
+          "verification_stale_after_workspace_change"
+        ],
+        "summary": "{\"verification\": \"VERIFIED\", \"closure\": \"BLOCKED\", \"reasons\": [\"verification_stale_after_workspace_change\"]}"
+      },
+      "status": "BLOCKED",
+      "exit_code": 3,
+      "evidence": "reasons: ['verification_stale_after_workspace_change']"
+    },
+    {
+      "id": "verified_closure_closed",
+      "title": "Fresh verification closes the task",
+      "command": "Test + fresh closure",
+      "guard": {
+        "exit_code": 0,
+        "status": "PASS",
+        "summary": "conditional_changes: []\ndenied_changes: []\nunmatched_changes: []\napproval_status: not_required\nstate_status: OK\nforbidden_operation_status: PASS\nreasons: []\nrun_at: '2026-07-15T09:55:49.561721+00:00'",
+        "evidence": "Guard completed."
+      },
+      "test": {
+        "command_id": "synthetic-unittest",
+        "command": "python -m unittest discover -s tests",
+        "status": "PASS",
+        "required": true,
+        "exit_code": 0,
+        "summary": ".\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      },
+      "closure": {
+        "exit_code": 0,
+        "verification": "VERIFIED",
+        "closure": "CLOSED",
+        "reasons": [],
+        "summary": "{\"verification\": \"VERIFIED\", \"closure\": \"CLOSED\", \"reasons\": []}"
+      },
+      "status": "CLOSED",
+      "exit_code": 0,
+      "evidence": "fresh evidence accepted"
+    }
+  ]
+}

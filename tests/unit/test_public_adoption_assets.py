@@ -11,7 +11,8 @@ from governance.audit.checks import run_audit
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_DOCS = (
     ROOT / "README.md", ROOT / "README.zh-CN.md", ROOT / "docs" / "GETTING_STARTED.md",
-    ROOT / "docs" / "ADOPTION_AUDIT.md", ROOT / "docs" / "PRESETS.md", ROOT / "docs" / "examples" / "README.md",
+    ROOT / "docs" / "ADOPTION_AUDIT.md", ROOT / "docs" / "PRESETS.md", ROOT / "docs" / "DEMO.md",
+    ROOT / "docs" / "examples" / "README.md",
 )
 BAD_FRAGMENTS = ("\ufffd", "Ã", "Â", "â€", "ðŸ")
 
