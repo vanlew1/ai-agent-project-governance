@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_lifecycle_evidence.schema.json",
+  "title": "Adoption Lifecycle Evidence",
+  "description": "Schema envelope for a provenance-bound lifecycle evidence file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence_type", "status", "target_identity_digest", "previous_state_digest", "upstream_evidence_digests", "payload"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "evidence_type": {"enum": ["PreflightEvidence", "GuardEvidence", "TestPlanEvidence", "TestRunEvidence", "VerificationEvidence", "ClosureEvidence"]},
+    "status": {"type": "string", "minLength": 1},
+    "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "previous_state_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "upstream_evidence_digests": {"type": "array", "items": {"type": "string", "pattern": "^[a-f0-9]{64}$"}},
+    "payload": {"type": "object"}
+  }
+}
