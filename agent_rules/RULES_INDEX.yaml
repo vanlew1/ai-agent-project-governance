@@ -34,6 +34,11 @@ lightweight_entry:
 
 
 execution_contracts:
+  execution_envelope:
+    source: agent_rules/15_plan_adaptation_rules.md
+    authority_rules: [GOV-LEVEL-001, GOV-CONFIRM-001, GOV-ENVELOPE-001, GOV-BLOCKER-001, GOV-INHERIT-001, GOV-EVIDENCE-001]
+    description: Ordinary task confirmation, recoverable blocker handling, authorization inheritance, and reproducible test evidence.
+    fail_closed_when: [unknown_risk, scope_change, production_semantics, external_access, production_write, destructive_operation]
   token_efficient_execution:
     source: agent_rules/14_cost_aware_testing_rules.md
     description: "低 token、低重复、人工前置门优先的执行合同；不得削弱数据安全、测试质量或验收门禁"

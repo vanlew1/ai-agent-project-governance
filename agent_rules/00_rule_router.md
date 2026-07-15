@@ -19,6 +19,7 @@
 - 默认按 B 类任务处理不明确需求。
 - 未确认施工方案前，默认按 DISCOVERY 或 ADAPTATION 处理，不得直接进入 EXECUTION。
 - 风险可以升级，修改范围不得自动扩大。
+- 普通已确认任务进入 agent_rules/15_plan_adaptation_rules.md 的 Level 2；不得因测试或报告阶段重复要求项目初始化。GOV-ENVELOPE-001 以该文件为唯一权威来源。
 - 只在触发条件满足时加载附加规则。
 - 规则读取应服务于当前任务，而不是覆盖式浏览仓库。
 - 成本、联网、正式写入或大规模验证任务必须遵守 `14_cost_aware_testing_rules.md` 的 Token-Efficient Execution Contract。

@@ -22,6 +22,8 @@ PLACEHOLDERS = {
     "<WHAT_IT_DOES>": "summary",
 }
 
+PRESETS = ("lightweight", "standard", "strict")
+
 
 def prompt_text(label: str, default: str = "") -> str:
     suffix = f" [{default}]" if default else ""
@@ -93,6 +95,15 @@ def initialize_git_repo(target_dir: Path) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create a governed project")
     parser.add_argument("--adapter", choices=("auto", "generic", "python", "node", "wechat_miniprogram"), default="auto")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="Directory in which to create the new project folder (defaults to the template's parent).",
+    )
+    parser.add_argument(
+        "--preset", choices=PRESETS, default="standard",
+        help="Initial governance focus (default: standard; existing template files are retained for every preset).",
+    )
     return parser.parse_args()
 
 def write_adapter_config(target_dir: Path, requested: str) -> None:
@@ -106,10 +117,22 @@ def write_adapter_config(target_dir: Path, requested: str) -> None:
     state = {"schema_version":"1.0","project_mode":"DISCOVERY","architecture_status":"draft","implementation_plan_status":"draft","repository_root":".","adapter":adapter,"auxiliary_adapters":value["auxiliary_adapters"],"adapter_detection_status":value["detection_status"],"high_risk_paths":[],"default_forbidden_operations":["production_write"]}
     (state_dir / "project_state.yaml").write_text(yaml.safe_dump(state, sort_keys=False), encoding="utf-8")
 
+
+def write_preset_config(target_dir: Path, preset: str) -> dict[str, object]:
+    if preset not in PRESETS:
+        raise ValueError(f"Unsupported preset: {preset}")
+    source = target_dir / "config" / "presets" / f"{preset}.yaml"
+    data = yaml.safe_load(source.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or data.get("preset") != preset:
+        raise ValueError(f"Invalid preset definition: {source}")
+    destination = target_dir / "config" / "governance_preset.yaml"
+    destination.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    return data
+
 def main() -> int:
     args = parse_args()
     template_dir = Path(__file__).resolve().parents[1]
-    base_dir = template_dir.parent
+    base_dir = args.output_dir.expanduser().resolve() if args.output_dir else template_dir.parent
 
     print("=" * 54)
     print("Agent Governance Template Setup")
@@ -131,6 +154,11 @@ def main() -> int:
         print("\n[Cancelled]")
         return 0
 
+    if base_dir.exists() and not base_dir.is_dir():
+        print(f"[ERROR] Output path is not a directory: {base_dir}")
+        return 1
+    base_dir.mkdir(parents=True, exist_ok=True)
+
     target_dir = base_dir / project_name
     if target_dir.exists():
         print(f"[ERROR] Target directory already exists: {target_dir}")
@@ -149,6 +177,7 @@ def main() -> int:
     write_workspace_router(target_dir)
     append_project_summary(target_dir, values)
     write_adapter_config(target_dir, args.adapter)
+    preset = write_preset_config(target_dir, args.preset)
 
     if init_git:
         try:
@@ -158,28 +187,32 @@ def main() -> int:
         except subprocess.CalledProcessError as exc:
             print(f"[WARN] Git initialization failed: {exc}")
 
+    print_next_steps(target_dir, preset)
+    return 0
+
+
+def print_next_steps(target_dir: Path, preset: dict[str, object]) -> None:
     print()
     print("[SUCCESS] Your new project has been created.")
     print(f"Project folder: {target_dir}")
     print()
     print("Review these files next:")
-    print(f"- {target_dir / 'docs' / 'PROJECT_BRIEF_DRAFT.md'}")
-    print(f"- {target_dir / 'docs' / 'AGENT_QUICK_CONTEXT.md'}")
-    print(f"- {target_dir / 'docs' / 'OPEN_QUESTIONS.md'}")
-    print(f"- {target_dir / 'docs' / 'BOOTSTRAP_DECISION.md'}")
-    print(f"- {target_dir / 'docs' / 'IMPLEMENTATION_PLAN.md'}")
-    print(f"- {target_dir / 'agent_rules' / '11_project_specific_rules.md'}")
-    print(f"- {target_dir / 'agent_rules' / '15_plan_adaptation_rules.md'}")
-    print(f"- {target_dir / 'docs' / 'ARCHITECTURE.md'}")
-    print(f"- {target_dir / 'docs' / 'MODULE_REGISTRY.yaml'}")
-    print(f"- {target_dir / 'docs' / 'TASK_REGISTRY.yaml'}")
-    print(f"- {target_dir / 'docs' / 'CHANGELOG.md'}")
+    for relative in (
+        "docs/PROJECT_BRIEF_DRAFT.md", "docs/AGENT_QUICK_CONTEXT.md", "docs/OPEN_QUESTIONS.md",
+        "docs/BOOTSTRAP_DECISION.md", "docs/IMPLEMENTATION_PLAN.md", "agent_rules/11_project_specific_rules.md",
+        "agent_rules/15_plan_adaptation_rules.md", "docs/ARCHITECTURE.md", "docs/MODULE_REGISTRY.yaml",
+        "docs/TASK_REGISTRY.yaml", "docs/CHANGELOG.md", "config/governance_preset.yaml",
+    ):
+        print(f"- {target_dir / relative}")
     print()
-    print("Before EXECUTION, make sure:")
+    print(f"Preset: {preset['preset']}: {preset['purpose']}")
+    print("First focus:")
+    for item in preset["initial_focus"]:
+        print(f"- {item}")
+    print("\nBefore EXECUTION, make sure:")
     print("- docs/IMPLEMENTATION_PLAN.md has every execution confirmation field filled in.")
     print("- External platform/API/data access method is confirmed or explicitly out of scope.")
     print("- Generated outputs, raw data, and private samples stay out of Git unless sanitized.")
-    return 0
 
 
 if __name__ == "__main__":

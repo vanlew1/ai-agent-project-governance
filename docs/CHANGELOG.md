@@ -4,6 +4,8 @@
 
 ### Added
 
+- Added public-facing README files, Quickstart, adoption and demo guides, examples, community files, Issue/PR templates, compatibility evidence, and repository-settings checklist for GOV-OSS-GROWTH-01.
+
 - Added P2 local-state, approval-freshness, Guard baseline and acceptance tests; approval-to-Guard enforcement remains incomplete.
 - Added deterministic TaskRequest/ProjectState to TaskContract Preflight models, CLI, fixtures, and tests; persistence, guards, test execution, and automatic closure remain unimplemented.
 - Added the governance runtime target architecture, module registry, core Schema contracts, baseline validator, and baseline tests. Runtime behavior remains disabled in P0.

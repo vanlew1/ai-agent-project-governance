@@ -5,37 +5,207 @@
   "description": "The compact structured work order for a governed task.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "task_id", "project_mode", "task_level", "status", "objective", "read_scope", "write_scope", "autonomy", "stop_conditions", "verification", "report"],
+  "required": [
+    "schema_version",
+    "task_id",
+    "project_mode",
+    "task_level",
+    "status",
+    "objective",
+    "read_scope",
+    "write_scope",
+    "autonomy",
+    "stop_conditions",
+    "verification",
+    "report"
+  ],
   "properties": {
-    "schema_version": {"const": "1.0"},
-    "task_id": {"type": "string", "minLength": 1},
-    "project_mode": {"enum": ["DISCOVERY", "ADAPTATION", "EXECUTION"]},
-    "task_level": {"enum": ["A", "B", "C"]},
-    "status": {"enum": ["DRAFT", "READY", "BLOCKED", "ACTIVE", "CLOSED"]},
-    "objective": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-    "read_scope": {"type": "array", "items": {"type": "string"}},
-    "write_scope": {
-      "type": "object", "additionalProperties": false, "required": ["allow", "deny"],
-      "properties": {"allow": {"type": "array", "items": {"type": "string"}}, "deny": {"type": "array", "items": {"type": "string"}}}
+    "schema_version": {
+      "const": "1.0"
     },
-    "autonomy": {
-      "type": "object", "additionalProperties": false,
-      "required": ["may_debug_test_failures", "may_edit_adjacent_tests", "may_edit_same_module_helpers", "must_not_expand_architecture"],
-      "properties": {
-        "may_debug_test_failures": {"type": "boolean"},
-        "may_edit_adjacent_tests": {"type": "boolean"},
-        "may_edit_same_module_helpers": {"oneOf": [{"type": "boolean"}, {"const": "conditional"}]},
-        "must_not_expand_architecture": {"type": "boolean"}
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_mode": {
+      "enum": [
+        "DISCOVERY",
+        "ADAPTATION",
+        "EXECUTION"
+      ]
+    },
+    "task_level": {
+      "enum": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "READY",
+        "BLOCKED",
+        "ACTIVE",
+        "CLOSED"
+      ]
+    },
+    "objective": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "read_scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     },
-    "stop_conditions": {"type": "array", "items": {"type": "string"}},
+    "write_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allow",
+        "deny"
+      ],
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "may_debug_test_failures",
+        "may_edit_adjacent_tests",
+        "may_edit_same_module_helpers",
+        "must_not_expand_architecture"
+      ],
+      "properties": {
+        "may_debug_test_failures": {
+          "type": "boolean"
+        },
+        "may_edit_adjacent_tests": {
+          "type": "boolean"
+        },
+        "may_edit_same_module_helpers": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "conditional"
+            }
+          ]
+        },
+        "must_not_expand_architecture": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "verification": {
-      "type": "object", "additionalProperties": false, "required": ["level_1", "level_2", "level_3"],
-      "properties": {"level_1": {"type": "array", "items": {"type": "string"}}, "level_2": {"type": "array", "items": {"type": "string"}}, "level_3": {"type": "array", "items": {"type": "string"}}}
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level_1",
+        "level_2",
+        "level_3"
+      ],
+      "properties": {
+        "level_1": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "level_2": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "level_3": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "report": {
-      "type": "object", "additionalProperties": false, "required": ["format", "fields"],
-      "properties": {"format": {"enum": ["compact"]}, "fields": {"type": "array", "items": {"type": "string"}, "minItems": 1}}
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "fields"
+      ],
+      "properties": {
+        "format": {
+          "enum": [
+            "compact"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "confirmation_fields",
+        "execution_envelope_rule"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "LEVEL_1_PROJECT_INITIALIZATION",
+            "LEVEL_2_TASK",
+            "LEVEL_3_HIGH_RISK"
+          ]
+        },
+        "confirmation_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "parent_task_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "execution_envelope_rule": {
+          "const": "GOV-ENVELOPE-001"
+        }
+      }
     }
   }
 }

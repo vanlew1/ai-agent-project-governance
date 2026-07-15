@@ -12,7 +12,7 @@ class GateDecision:
 
 
 def resolve_gate(risks: RiskSummary, code_task: bool, code_writes_allowed: bool) -> GateDecision:
-    blockers = {"external": "new_user_permission_required", "production": "production_data_write_required", "destructive": "irreversible_operation_required", "release": "new_user_permission_required", "secret": "new_user_permission_required"}
+    blockers = {"external": "new_user_permission_required", "production": "production_data_write_required", "destructive": "irreversible_operation_required", "release": "new_user_permission_required", "secret": "new_user_permission_required", "unknown": "risk_or_scope_unclear"}
     stops = tuple(sorted({blockers[risk] for risk in risks.kinds if risk in blockers}))
     if stops:
         return GateDecision("BLOCKED", stops)

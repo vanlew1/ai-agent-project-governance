@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible runtime problem without sensitive data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes: {value: Do not include tokens, credentials, complete environment variables, or private logs.}
+  - type: input
+    id: version
+    attributes: {label: Version}
+    validations: {required: true}
+  - type: input
+    id: os
+    attributes: {label: Operating system}
+    validations: {required: true}
+  - type: input
+    id: python
+    attributes: {label: Python version}
+    validations: {required: true}
+  - type: input
+    id: adapter
+    attributes: {label: Adapter}
+    validations: {required: true}
+  - type: textarea
+    id: repro
+    attributes: {label: Minimal reproduction}
+    validations: {required: true}
+  - type: textarea
+    id: actual
+    attributes: {label: Actual result}
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes: {label: Expected result}
+    validations: {required: true}
+  - type: dropdown
+    id: gate
+    attributes:
+      label: "Did you run the unified local gate?"
+      options: ["Yes", "No", "Not applicable"]
+    validations: {required: true}

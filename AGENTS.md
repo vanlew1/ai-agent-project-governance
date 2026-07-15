@@ -76,6 +76,8 @@ A 类任务默认不要读取完整 `docs/ARCHITECTURE.md`、`docs/IMPLEMENTATIO
 
 `docs/AGENT_QUICK_CONTEXT.md` 只是轻量入口，不是规则真源；如与 `AGENTS.md`、`agent_rules/RULES_INDEX.yaml` 或 `agent_rules/` 下完整规则冲突，以完整规则树为准。
 
+普通已确认任务按 agent_rules/15_plan_adaptation_rules.md 的 Level 2 和 GOV-ENVELOPE-001 连续完成实现、测试、可恢复测试修复和报告；真实联网、正式写入、受保护资产、不可逆操作、风险/范围不清仍为硬阻断。
+
 B/C 类任务需要明确：
 
 1. 当前项目模式：DISCOVERY、ADAPTATION 或 EXECUTION。

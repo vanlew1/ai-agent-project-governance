@@ -1,0 +1,1 @@
+{"name":"governance-wechat-small","version":"0.0.0","private":true,"scripts":{"test":"node --test tests/title.test.js"}}

@@ -1,0 +1,43 @@
+name: Adoption feedback
+description: Share a privacy-respecting first-use experience.
+title: "[Adoption] "
+labels: [feedback]
+body:
+  - type: dropdown
+    id: coding_agent
+    attributes:
+      label: Coding agent
+      options: [Codex, Claude Code, Cursor, GitHub Copilot, Other]
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: Project technology stack
+      placeholder: "Example: Python and React"
+    validations:
+      required: true
+  - type: dropdown
+    id: audit_success
+    attributes:
+      label: Did the local audit complete?
+      options: [Yes, No, I did not run it]
+    validations:
+      required: true
+  - type: dropdown
+    id: preset_fit
+    attributes:
+      label: Was the recommended preset reasonable?
+      options: [Yes, Partly, No]
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: What felt too heavy or hard to understand?
+      description: "Please do not include source code, secrets, or private logs."
+  - type: input
+    id: public_repo
+    attributes:
+      label: Optional public repository link
+      description: "Optional. Do not share private repositories."

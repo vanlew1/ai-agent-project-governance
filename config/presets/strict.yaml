@@ -1,0 +1,15 @@
+schema_version: "1.0"
+preset: strict
+purpose: "Projects involving production data, external systems, multiple agents, or other high-risk work."
+initial_focus:
+  - "Record approvals, task state, and forbidden operations before execution."
+  - "Require complete verification, handoff, and audit evidence."
+  - "Keep production and external-access operations explicitly out of autonomous scope."
+required_boundaries:
+  - approvals
+  - task_state
+  - guard_checks
+  - complete_verification
+  - handoff
+  - audit_evidence
+upgrade_path: "Remain strict while high-risk conditions apply; this preset does not guarantee safety."

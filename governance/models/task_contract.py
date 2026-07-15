@@ -1,6 +1,6 @@
 """Schema-aligned immutable TaskContract model."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Mapping
 
 
@@ -18,6 +18,7 @@ class TaskContract:
     stop_conditions: tuple[str, ...]
     verification: Mapping[str, Any]
     report: Mapping[str, Any]
+    governance: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "TaskContract":
@@ -27,4 +28,7 @@ class TaskContract:
         return cls(**copied)
 
     def to_mapping(self) -> dict[str, Any]:
-        return {"schema_version": self.schema_version, "task_id": self.task_id, "project_mode": self.project_mode, "task_level": self.task_level, "status": self.status, "objective": list(self.objective), "read_scope": list(self.read_scope), "write_scope": dict(self.write_scope), "autonomy": dict(self.autonomy), "stop_conditions": list(self.stop_conditions), "verification": dict(self.verification), "report": dict(self.report)}
+        result = {"schema_version": self.schema_version, "task_id": self.task_id, "project_mode": self.project_mode, "task_level": self.task_level, "status": self.status, "objective": list(self.objective), "read_scope": list(self.read_scope), "write_scope": dict(self.write_scope), "autonomy": dict(self.autonomy), "stop_conditions": list(self.stop_conditions), "verification": dict(self.verification), "report": dict(self.report)}
+        if self.governance:
+            result["governance"] = dict(self.governance)
+        return result

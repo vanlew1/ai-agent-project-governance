@@ -91,7 +91,19 @@ If access method is not confirmed, only interfaces, mocks, fixtures, or manual-i
 
 ## Execution Confirmation
 
-Fill every field before moving to EXECUTION mode. If any field is blank, stay in ADAPTATION.
+Choose one confirmation path. Do not use the simplified path for real external access, formal data writes, protected assets, irreversible operations, unclear risk/scope, or unresolved product/architecture decisions.
+
+### Level 2 — ordinary task confirmation
+
+| Field | Value |
+| --- | --- |
+| Task goal | |
+| Allowed scope | |
+| Forbidden scope | |
+| Required tests | |
+| Report path | |
+
+### Level 3 — high-risk or legacy complete confirmation
 
 | Field | Value |
 | --- | --- |
@@ -106,7 +118,7 @@ Fill every field before moving to EXECUTION mode. If any field is blank, stay in
 ## Execution Gate Checklist
 
 - [ ] Plan status is `confirmed`.
-- [ ] Owner confirmation is recorded in the table above.
+- [ ] The applicable Level 2 or Level 3 confirmation is recorded in the table above.
 - [ ] Allowed and forbidden write scopes are explicit.
 - [ ] External access plan is complete or explicitly not applicable.
 - [ ] Blocking questions are answered or accepted as risks.

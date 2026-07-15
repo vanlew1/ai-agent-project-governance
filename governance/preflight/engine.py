@@ -6,6 +6,7 @@ from typing import Any, Mapping
 from ..models.project_state import ProjectState
 from ..models.task_contract import TaskContract
 from ..models.task_request import TaskRequest
+from ..policy.execution_envelope import confirmation_requirement, governance_level
 from ..schema_loader import validate_mapping
 from .contract_builder import build_contract
 from .gate_resolver import GateDecision, resolve_gate
@@ -37,6 +38,8 @@ def run_preflight(task_value: Mapping[str, Any], state_value: Mapping[str, Any])
     risks = detect_risks(task, state, code_task)
     gate = resolve_gate(risks, code_task, mode.code_writes_allowed)
     scope = resolve_scope(task, state, gate.status, code_task)
-    contract_value = build_contract(task, state.project_mode, classification.task_level, gate, scope)
+    context = task.governance_context
+    level = governance_level(context, risks.kinds)
+    contract_value = build_contract(task, state.project_mode, classification.task_level, gate, scope, level, confirmation_requirement(level))
     validate_mapping(contract_value, "task_contract.schema.json")
     return PreflightResult(TaskContract.from_mapping(contract_value), classification, risks, {"READY": 0, "DRAFT": 2, "BLOCKED": 3}[gate.status])

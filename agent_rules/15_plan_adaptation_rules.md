@@ -173,3 +173,15 @@ At the start of a new project, the assistant should state:
 - files it may update
 - files it must not finalize yet
 - what evidence is needed to move to the next mode
+
+
+## Execution Envelope and Blocker Policy (authoritative)
+
+The following rules are the single authority for ordinary-task continuation. AGENTS.md and RULES_INDEX.yaml only route to this section.
+
+- GOV-LEVEL-001: Use **Level 1 project initialization** only for first takeover, framework deployment or major upgrade, material core-stack/security-boundary change, or an untrusted baseline. An ordinary local task uses **Level 2** and must not restart project initialization. Real network/API access, formal data writes, protected production assets, irreversible operations, unresolved product/architecture decisions, or an unclear baseline use **Level 3 high-risk confirmation**.
+- GOV-CONFIRM-001: A low-risk Level 2 B/ADAPTATION task needs task_goal, allowed_scope, forbidden_scope, required_tests, and report_path. The legacy complete format (confirmed_by, confirmation_date, confirmed_scope, remaining_accepted_risks, first_execution_task) remains valid and is required for Level 3. Unknown risk or scope fails closed.
+- GOV-ENVELOPE-001: After a Level 2 confirmation, the same task may repair a missing fixture/helper, basetemp, test report, marker, local-only direct dependency, test-network isolation, or same-module test extension. Continue only when the goal and boundaries are unchanged, risk does not increase, no production semantics/data/assets are touched, no real network or irreversible operation is needed, and the recovery is verified by the current task.
+- GOV-BLOCKER-001: A network download, real API, formal DB/Cache/Projection write, production registry/provider change, protected asset, production semantic change, destructive Git/file operation, missing authority/product decision, unclear baseline, or unknown action is a HARD_BLOCKER. State the rule ID and concise reason; do not treat it as a recoverable scope expansion.
+- GOV-INHERIT-001: Design, implementation, tests, recoverable test repair, regression, and reporting inherit authorization when parent_task_id, goal, allowed/forbidden scope, risk level, and production scope are identical. Any change to these boundaries interrupts inheritance and requires renewed confirmation. Test infrastructure repair remains part of the parent task and must not recursively create an ADAPTATION task.
+- GOV-EVIDENCE-001: Record the executable command, working directory, node scope, markers, environment variable names only, dependency versions, basetemp, counts, failed nodes, JUnit path if available, and baseline HEAD. A historical numeric summary without command/scope is not fully reproducible; never invent missing evidence.

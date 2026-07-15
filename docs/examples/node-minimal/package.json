@@ -1,0 +1,7 @@
+{
+  "name": "synthetic-node-minimal",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

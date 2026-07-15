@@ -1,0 +1,19 @@
+# Isolated demo output (compact)
+
+## Scope Guard
+contract.write_scope.allow = [src/]
+changed_files = [secrets/token.txt]
+status: BLOCKED
+denied_changes: [secrets/token.txt]
+
+## Stale Closure
+verification.completion_status: VERIFIED
+workspace_changed_after_verification: true
+status: BLOCKED
+reasons: [verification_stale_after_workspace_change]
+
+## Single-writer protection
+worker-a.write_scope: [src/shared.py]
+worker-b.write_scope: [src/shared.py]
+plan_status: BLOCKED
+conflict_status: BLOCKED

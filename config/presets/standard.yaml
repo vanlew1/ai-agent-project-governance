@@ -1,0 +1,14 @@
+schema_version: "1.0"
+preset: standard
+purpose: "Long-lived or multi-module repositories."
+initial_focus:
+  - "Classify tasks and record module boundaries."
+  - "Register a focused test plan before implementation."
+  - "Maintain change and closure records."
+required_boundaries:
+  - task_classification
+  - module_boundaries
+  - test_plan
+  - change_record
+  - closure_record
+upgrade_path: "Move to strict before handling production data, external systems, or concurrent agents."

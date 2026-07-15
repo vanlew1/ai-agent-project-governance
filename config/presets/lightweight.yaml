@@ -1,0 +1,15 @@
+schema_version: "1.0"
+preset: lightweight
+purpose: "Personal repositories and narrowly scoped development tasks."
+initial_focus:
+  - "Fill in AGENTS.md with allowed and forbidden paths."
+  - "Document one local test command and the Git, credential, and external-access boundaries."
+  - "Close each task with a short report."
+required_boundaries:
+  - agent_entry
+  - change_scope
+  - local_test_command
+  - git_and_credentials
+  - external_access
+  - completion_report
+upgrade_path: "Move to standard when the repository gains multiple modules or a sustained task backlog."

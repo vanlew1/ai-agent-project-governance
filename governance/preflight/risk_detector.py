@@ -29,5 +29,7 @@ def detect_risks(task: TaskRequest, state: ProjectState, code_task: bool) -> Ris
         risks.append("scope")
     if code_task and any(fnmatch(path, pattern) for path in paths for pattern in state.high_risk_paths):
         risks.append("production")
+    if task.governance_context.get("risk_status") == "unknown":
+        risks.append("unknown")
     kinds = tuple(sorted(set(risks)))
     return RiskSummary(tuple(RISK_RULES[kind] for kind in kinds), kinds)

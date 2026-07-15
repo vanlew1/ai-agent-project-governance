@@ -1,0 +1,35 @@
+name: Adapter request
+description: Request an adapter with verifiable markers and safe commands.
+title: "[Adapter]: "
+labels: [adapter]
+body:
+  - type: input
+    id: version
+    attributes: {label: Version}
+    validations: {required: true}
+  - type: input
+    id: os
+    attributes: {label: Operating system}
+    validations: {required: true}
+  - type: input
+    id: python
+    attributes: {label: Python version}
+    validations: {required: true}
+  - type: input
+    id: adapter
+    attributes: {label: Requested adapter and current adapter}
+    validations: {required: true}
+  - type: textarea
+    id: repro
+    attributes: {label: Sanitized markers and safe commands}
+    validations: {required: true}
+  - type: textarea
+    id: expected
+    attributes: {label: Expected detection and guard behavior}
+    validations: {required: true}
+  - type: dropdown
+    id: gate
+    attributes:
+      label: "Did you run the unified local gate?"
+      options: ["Yes", "No", "Not applicable"]
+    validations: {required: true}

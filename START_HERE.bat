@@ -1,16 +1,16 @@
-@echo off
+﻿@echo off
 setlocal
 cd /d "%~dp0"
 
 where python >nul 2>nul
 if %errorlevel%==0 (
-    python scripts\init_new_project.py
+    python scripts\init_new_project.py %*
     goto end
 )
 
 where py >nul 2>nul
 if %errorlevel%==0 (
-    py scripts\init_new_project.py
+    py scripts\init_new_project.py %*
     goto end
 )
 

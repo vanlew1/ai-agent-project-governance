@@ -48,5 +48,22 @@ class PreflightRuntimeTest(unittest.TestCase):
         self.assertEqual("READY", result.contract.status)
 
 
+    def test_governance_levels_are_deterministic_and_backward_compatible(self) -> None:
+        task = load("task_safe_patch.yaml")
+        task["governance_context"] = {"project_event": "first_takeover"}
+        result = run_preflight(task, load("project_state_execution.yaml"))
+        self.assertEqual("LEVEL_1_PROJECT_INITIALIZATION", result.contract.governance["level"])
+        self.assertIn("task_goal", result.contract.governance["confirmation_fields"])
+        ordinary = self.preflight("task_safe_patch.yaml")
+        self.assertEqual("LEVEL_2_TASK", ordinary.contract.governance["level"])
+
+    def test_unknown_risk_fails_closed(self) -> None:
+        task = load("task_safe_patch.yaml")
+        task["governance_context"] = {"risk_status": "unknown"}
+        result = run_preflight(task, load("project_state_execution.yaml"))
+        self.assertEqual(("BLOCKED", 3), (result.contract.status, result.exit_status))
+        self.assertIn("risk_or_scope_unclear", result.contract.stop_conditions)
+
+
 if __name__ == "__main__":
     unittest.main()

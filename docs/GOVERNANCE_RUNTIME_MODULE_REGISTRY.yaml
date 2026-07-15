@@ -85,6 +85,18 @@ modules:
     phase: P1
     public_entrypoints: [scripts/agent_preflight.py]
     notes: Deterministic Preflight only; no persistence, guard, runner, or closure.
+  execution_policy:
+    owner: framework_maintainers
+    layer: policy_decision
+    purpose: Closed deterministic classification of governance level, execution-envelope recovery, and authorization inheritance.
+    status: existing
+    paths: [governance/policy/]
+    depends_on: [runtime_models, rule_layer]
+    must_not_depend_on: [network, filesystem, project_business_code]
+    risk_level: high
+    phase: P6
+    public_entrypoints: [governance.policy]
+    notes: Policy classification only; it never performs remediation, network access, dependency download, or state mutation.
   state_store:
     owner: framework_maintainers
     layer: state_and_approval
@@ -171,3 +183,16 @@ modules:
     phase: P6
     public_entrypoints: [scripts/agent_orchestrate.py, scripts/agent_handoff.py, scripts/agent_aggregate.py]
     notes: Local contracts only; no automatic agent or Git operations.
+
+  adoption_audit:
+    owner: framework_maintainers
+    layer: adoption_experience
+    purpose: Deterministic, bounded, local-first completeness checks for coding-agent adoption.
+    status: existing
+    paths: [governance/audit/, scripts/agent_audit.py, config/presets/]
+    depends_on: [adapter_protocol]
+    must_not_depend_on: [network, secrets, production_data, external_models]
+    risk_level: medium
+    phase: AGC-UX-01
+    public_entrypoints: [scripts/agent_audit.py, scripts/init_new_project.py]
+    notes: The audit reads only bounded public governance documentation and filenames; it does not collect telemetry or project secrets.
