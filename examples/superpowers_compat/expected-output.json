@@ -1,0 +1,9 @@
+{
+  "compatibility_maturity": "documented_offline_mapping_only",
+  "external_workflow_required": false,
+  "scenarios": [
+    {"id": "scope_blocked", "status": "BLOCKED", "exit_code": 3},
+    {"id": "stale_verification_blocked", "status": "BLOCKED", "exit_code": 3},
+    {"id": "verified_closure_closed", "status": "CLOSED", "exit_code": 0}
+  ]
+}

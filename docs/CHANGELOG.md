@@ -25,6 +25,20 @@
 -
 - Added P3 allowlisted verification, closure, isolated CLI acceptance, and compact reporting; adapters, CI, and multi-agent remain disabled.
 
+## [1.1.0] - 2026-07-16
+
+### Added
+
+- Added workflow-agnostic positioning, a documented Superpowers mapping, an offline TaskContract example, a reproducible synthetic case study, and public share/release materials.
+
+### Changed
+
+- Repositioned the public entry points around deterministic scope checks, evidence freshness, and Closure; clarified that the bounded adoption lifecycle is the recommended existing-project path.
+
+### Security
+
+- No remote workflow integration, external API, publishing automation, production operation, or official third-party compatibility claim was added.
+
 ## GOV-RUNTIME-P5
 - Added self-validation, schema compatibility, isolated bootstrap checks, a fixed local release gate, and least-privilege GitHub Actions CI.
 

@@ -13,7 +13,7 @@ def main():
         if not (root/item).is_file(): errors.append(f"Missing template file: {item}")
     with tempfile.TemporaryDirectory(prefix="governance-p5-") as temp:
         target=Path(temp)/"generated-\u4e2d\u6587"
-        shutil.copytree(root,target,ignore=shutil.ignore_patterns(".git","__pycache__",".agent_state",".tmp"))
+        shutil.copytree(root,target,ignore=shutil.ignore_patterns(".git",".agents",".codex","__pycache__",".agent_state",".tmp"))
         sys.path.insert(0, str(root))
         from scripts.init_new_project import rename_template_files, replace_placeholders, write_adapter_config, write_workspace_router
         rename_template_files(target); replace_placeholders(target,{"project_name":"generated","project_type":"test","owner":"P5","summary":"Unicode smoke"}); write_workspace_router(target)

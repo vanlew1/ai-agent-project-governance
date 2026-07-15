@@ -1,5 +1,13 @@
 # Adopt an Existing Project
 
+## Recommended path: use the bounded lifecycle
+
+For an existing repository, use `scripts/agent_adopt.py` as the single recommended adoption path: start with `dry-run`, review/export drafts outside the target, compile a Runtime preview, and only then use separately approved installation and activation steps. It is local-only and does not download dependencies.
+
+Manual copying of templates is intentionally not a normal adoption path. Keep it only as an advanced, user-managed recovery option when the bounded lifecycle cannot be used; it does not replace its provenance or approval checks.
+
+The lifecycle coexists with Superpowers, `AGENTS.md`, CI, hooks, and other workflows: those tools may provide task intent, while this runtime accepts only a bounded TaskContract and records its own local evidence. No external workflow receives a special trust exemption.
+
 You do not need to rebuild a business application.
 
 - The runtime does not automatically install dependencies, overwrite files, commit, or push.
