@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Renamed the public repository and product presentation to Coding Agent Governance; compatibility-facing schema identifiers and historical reports retain their original references.
+
 ### Added
 
 - Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.

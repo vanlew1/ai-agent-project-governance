@@ -3,8 +3,8 @@
 This path was run locally against this repository.
 
 ```powershell
-git clone https://github.com/vanlew1/ai-agent-project-governance.git
-cd ai-agent-project-governance
+git clone https://github.com/vanlew1/coding-agent-governance.git
+cd coding-agent-governance
 python -m pip install -r requirements-governance.txt
 python scripts/run_governance_ci.py
 ```

@@ -1,8 +1,8 @@
-# Share kit
+# Coding Agent Governance share kit
 
 ## Message spine
 
-Upper workflows help an AI coding agent plan and build. Agent Governance independently checks whether the work stayed in scope, whether its evidence is still fresh, and whether it can close.
+Upper workflows help an AI coding agent plan and build. Coding Agent Governance independently checks whether the work stayed in scope, whether its evidence is still fresh, and whether it can close.
 
 ## Proof points
 

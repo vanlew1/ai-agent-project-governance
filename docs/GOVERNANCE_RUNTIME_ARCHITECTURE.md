@@ -62,7 +62,7 @@ Deterministic local code must perform work that can be decided locally; the Agen
 ## 3. Target Repository Layout
 
 ```text
-ai-agent-project-governance/
+coding-agent-governance/
 鈹溾攢 agent_rules/                         # Human/Agent-readable principles
 鈹? 鈹溾攢 RULES_INDEX.yaml
 鈹? 鈹溾攢 00_rule_router.md ... 15_plan_adaptation_rules.md
