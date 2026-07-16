@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Prepared the public product presentation as Coding Agent Governance; the current repository slug remains `ai-agent-project-governance` until an authenticated GitHub rename can complete.
+
 ### Added
 
 - Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.
