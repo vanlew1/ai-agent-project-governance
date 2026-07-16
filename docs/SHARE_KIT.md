@@ -2,7 +2,7 @@
 
 ## Message spine
 
-Upper workflows help an AI coding agent plan and build. Coding Agent Governance independently checks whether the work stayed in scope, whether its evidence is still fresh, and whether it can close.
+Coding Agent Governance is a governance layer for AI coding agents that keeps changes scoped, evidence-bound, reviewable, and explicitly closed. Upper workflows help an agent plan and build; this project independently checks whether the work stayed in scope, whether its evidence is still fresh, and whether it can close.
 
 ## Proof points
 

@@ -5,6 +5,7 @@
 ### Changed
 
 - Prepared the public product presentation as Coding Agent Governance; the current repository slug remains `ai-agent-project-governance` until an authenticated GitHub rename can complete.
+- Added controlled distribution copy, a target-review matrix, and a tracking baseline for Coding Agent Governance. No runtime, schema, CLI, state-machine, repository-slug, or third-party submission change was made.
 
 ### Added
 

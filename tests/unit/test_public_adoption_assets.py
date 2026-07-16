@@ -15,6 +15,7 @@ PUBLIC_DOCS = (
     ROOT / "docs" / "examples" / "README.md", ROOT / "docs" / "SUPERPOWERS_COMPATIBILITY.md",
     ROOT / "docs" / "WORKFLOW_INTEGRATION.md", ROOT / "docs" / "CASE_STUDY_WORKFLOW_GOVERNANCE.md",
     ROOT / "docs" / "SHARE_KIT.md", ROOT / "docs" / "LAUNCH_COPY.md", ROOT / "docs" / "GITHUB_TOPICS.md",
+    ROOT / "docs" / "PROJECT_DISTRIBUTION_TRACKER.md",
 )
 BAD_FRAGMENTS = ("\ufffd", "Ã", "Â", "â€", "ðŸ")
 
@@ -60,12 +61,20 @@ class PublicAdoptionAssetsTest(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         compatibility = (ROOT / "docs" / "SUPERPOWERS_COMPATIBILITY.md").read_text(encoding="utf-8")
         example = ROOT / "examples" / "superpowers_compat"
-        self.assertIn("deterministic scope, evidence, and closure layer", readme)
+        self.assertIn("governance layer for AI coding agents", readme)
         self.assertIn("not a replacement", readme)
         self.assertIn("does **not** include a Superpowers plugin", compatibility)
         self.assertTrue((example / "upper-plan.md").is_file())
         self.assertTrue((example / "task-contract.yaml").is_file())
         self.assertTrue((example / "expected-output.json").is_file())
+
+    def test_controlled_distribution_assets_preserve_boundaries(self) -> None:
+        launch_copy = (ROOT / "docs" / "LAUNCH_COPY.md").read_text(encoding="utf-8")
+        tracker = (ROOT / "docs" / "PROJECT_DISTRIBUTION_TRACKER.md").read_text(encoding="utf-8")
+        self.assertIn("CLOSED != PRODUCTION_READY", launch_copy)
+        self.assertIn("synthetic-only", launch_copy)
+        self.assertIn("ai-agent-project-governance", launch_copy)
+        self.assertIn("PREPARED_NOT_POSTED", tracker)
 
 
 if __name__ == "__main__":
