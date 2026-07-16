@@ -5,6 +5,7 @@ This tracker is a public-workflow baseline. It must never contain tokens, passwo
 | Date | Channel | Target | Action | Status | URL | Result | Next review |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-07-17 | GitHub metadata | Repository settings | Prepared approved description and topics for owner review | PREPARED_NOT_POSTED | https://github.com/vanlew1/ai-agent-project-governance | Manual-only; no metadata write made | Before next release or owner settings review |
+| 2026-07-17 | GitHub repository | PR #6 | Opened self-repository documentation PR after local and remote checks | SUBMITTED | https://github.com/vanlew1/ai-agent-project-governance/pull/6 | `governance` and `windows-smoke` passed; merge-commit decision pending | After merge |
 | 2026-07-17 | X | Author account | Prepared distinct English and Chinese copy | PREPARED_NOT_POSTED | https://github.com/vanlew1/ai-agent-project-governance | No account automation or posting | Owner-selected posting window |
 | 2026-07-17 | Reddit | Relevant community | Prepared disclosed, synthetic-only draft | PREPARED_NOT_POSTED | https://github.com/vanlew1/ai-agent-project-governance | No account automation or posting | Review community rules before manual posting |
 | 2026-07-17 | Hacker News | Show HN | Prepared disclosed, synthetic-only draft | PREPARED_NOT_POSTED | https://github.com/vanlew1/ai-agent-project-governance | No account automation or posting | Owner-selected posting window |

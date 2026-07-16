@@ -142,7 +142,9 @@ No environment variables, dependencies, live APIs, database writes, production a
 
 ## Self-repository PR and next step
 
-The intended self-repository PR is:
+Self-repository PR: [#6](https://github.com/vanlew1/ai-agent-project-governance/pull/6). Its remote `governance` and `windows-smoke` checks passed before merge.
+
+The PR uses:
 
 - Branch: `codex/agc-growth-04`
 - Title: `docs(project): add controlled distribution assets and tracking`
@@ -156,7 +158,7 @@ The intended self-repository PR is:
   - External submissions require target-specific approval.
   ```
 
-Push, PR creation, merge commit, and merge remain owner-facing remote operations and are not performed in this task. The next safe action is to review the local diff and, if desired, authorize a self-repository PR separately; authorize one named third-party target separately before any external submission.
+The branch is pushed and the PR is created. The next operation is a merge commit only after this final report update passes the same remote checks. Authorize one named third-party target separately before any external submission.
 
 ## Completion state
 

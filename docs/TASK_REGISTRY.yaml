@@ -42,4 +42,4 @@ tasks:
           - "PASS: changed-path review confirms Build Week, runtime, schema, CLI, and state-machine paths are absent"
         manual_one_off_checks:
           - "PASS: public contribution-rule review completed for eight candidates"
-    notes: "No third-party promotional PR is authorized or created by this task; self-repository remote PR/merge is pending owner authorization."
+    notes: "Self-repository PR #6 was opened after passing local and remote checks. No third-party promotional PR is authorized or created by this task."
