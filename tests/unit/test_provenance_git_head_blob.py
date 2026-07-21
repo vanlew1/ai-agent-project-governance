@@ -12,6 +12,7 @@ from governance.errors import SchemaValidationError
 
 class GitHeadBlobProvenanceTest(unittest.TestCase):
     def setUp(self) -> None:
+        provenance._head_blob_digest.cache_clear()
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name) / "repository"
         self.root.mkdir()
@@ -26,6 +27,7 @@ class GitHeadBlobProvenanceTest(unittest.TestCase):
         self.git("commit", "-m", "initial generator sources")
 
     def tearDown(self) -> None:
+        provenance._head_blob_digest.cache_clear()
         self.temp_dir.cleanup()
 
     def git(self, *args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[bytes]:
@@ -51,6 +53,43 @@ class GitHeadBlobProvenanceTest(unittest.TestCase):
             provenance.generator_source_digest(root=self.root, inputs=tuple(reversed(provenance.GENERATOR_INPUTS))),
         )
 
+    def test_repeated_same_head_uses_cached_blob_digest(self) -> None:
+        expected = self.expected_digest_from_head()
+        self.assertEqual(expected, provenance.generator_source_digest(root=self.root))
+        first = provenance._head_blob_digest.cache_info()
+        self.assertEqual(expected, provenance.generator_source_digest(root=self.root))
+        second = provenance._head_blob_digest.cache_info()
+        self.assertEqual(1, first.misses)
+        self.assertEqual(first.misses, second.misses)
+        self.assertEqual(first.hits + 1, second.hits)
+
+    def test_head_input_contract_and_repository_change_invalidate_cache(self) -> None:
+        first = provenance.generator_source_digest(root=self.root)
+        self.assertEqual(1, provenance._head_blob_digest.cache_info().misses)
+        source = self.root / provenance.GENERATOR_INPUTS[2]
+        source.write_text("changed\n", encoding="utf-8")
+        self.git("add", provenance.GENERATOR_INPUTS[2])
+        self.git("commit", "-m", "change generator source")
+        self.assertNotEqual(first, provenance.generator_source_digest(root=self.root))
+        self.assertEqual(2, provenance._head_blob_digest.cache_info().misses)
+
+        provenance.generator_source_digest(root=self.root, inputs=tuple(reversed(provenance.GENERATOR_INPUTS)))
+        self.assertEqual(3, provenance._head_blob_digest.cache_info().misses)
+        original_version = provenance.GENERATOR_SOURCE_CONTRACT_VERSION
+        try:
+            provenance.GENERATOR_SOURCE_CONTRACT_VERSION = original_version + 1
+            provenance.generator_source_digest(root=self.root)
+            self.assertEqual(4, provenance._head_blob_digest.cache_info().misses)
+        finally:
+            provenance.GENERATOR_SOURCE_CONTRACT_VERSION = original_version
+
+        bare = Path(self.temp_dir.name) / "repository.git"
+        clone = Path(self.temp_dir.name) / "other-repository"
+        subprocess.run(["git", "clone", "--bare", str(self.root), str(bare)], check=True, capture_output=True)
+        subprocess.run(["git", "clone", str(bare), str(clone)], check=True, capture_output=True)
+        provenance.generator_source_digest(root=clone)
+        self.assertEqual(5, provenance._head_blob_digest.cache_info().misses)
+
     def test_clean_crlf_and_lf_checkouts_of_one_commit_match(self) -> None:
         source = self.root
         bare = Path(self.temp_dir.name) / "repository.git"
@@ -68,7 +107,9 @@ class GitHeadBlobProvenanceTest(unittest.TestCase):
         self.assertIn(b"\r\n", (crlf / "VERSION").read_bytes())
         self.assertEqual(provenance.generator_source_digest(root=lf), provenance.generator_source_digest(root=crlf))
 
-    def test_dirty_or_staged_generator_source_fails_closed(self) -> None:
+    def test_dirty_or_staged_generator_source_fails_closed_even_with_cached_digest(self) -> None:
+        provenance.generator_source_digest(root=self.root)
+        self.assertEqual(1, provenance._head_blob_digest.cache_info().misses)
         source = self.root / provenance.GENERATOR_INPUTS[1]
         source.write_text("dirty\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "working tree is dirty"):

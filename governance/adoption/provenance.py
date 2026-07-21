@@ -80,15 +80,21 @@ def _generator_input_paths(inputs: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(normalized)
 
 
-def _generator_repository_root(root: Path) -> Path:
-    resolved_root = root.resolve()
+@lru_cache(maxsize=16)
+def _repository_root(root_path: str) -> Path:
+    resolved_root = Path(root_path).resolve()
     top_level = Path(
         _require_git_success(resolved_root, "repository root lookup", "rev-parse", "--show-toplevel").decode("utf-8").strip(),
     ).resolve()
-    _require_git_success(resolved_root, "HEAD lookup", "rev-parse", "HEAD")
     if top_level != resolved_root:
         raise ValueError("Git provenance unavailable: generator source root is not the repository root")
     return resolved_root
+
+
+def _generator_repository_root(root: Path) -> tuple[Path, str]:
+    repository_root = _repository_root(str(root.resolve()))
+    head = _require_git_success(repository_root, "HEAD lookup", "rev-parse", "HEAD").decode("utf-8").strip()
+    return repository_root, head
 
 
 def _require_clean_generator_sources(root: Path, paths: tuple[str, ...]) -> None:
@@ -103,21 +109,39 @@ def _require_clean_generator_sources(root: Path, paths: tuple[str, ...]) -> None
             raise ValueError(f"Git provenance unavailable: {message} check failed")
 
 
-def generator_source_digest(*, root: Path | None = None, inputs: tuple[str, ...] = GENERATOR_INPUTS) -> str:
-    """Digest fixed generator inputs from clean Git HEAD blobs, never checkout bytes."""
-    repository_root = _generator_repository_root(root or SOURCE_ROOT)
-    paths = _generator_input_paths(inputs)
-    _require_clean_generator_sources(repository_root, paths)
+def _require_generator_inputs_tracked(root: Path, paths: tuple[str, ...]) -> None:
+    tracked = _run_git(root, "ls-files", "--error-unmatch", "--", *paths)
+    if tracked.returncode != 0:
+        raise ValueError("Git provenance unavailable: generator input is not tracked")
+    listed = set(tracked.stdout.decode("utf-8").splitlines())
+    missing = [relative_path for relative_path in paths if relative_path not in listed]
+    if missing:
+        raise ValueError(f"Git provenance unavailable: generator input is not tracked: {missing[0]}")
+
+
+@lru_cache(maxsize=128)
+def _head_blob_digest(
+    repository_root: str, head: str, paths: tuple[str, ...], source_basis: str, contract_version: int,
+) -> str:
     rows: dict[str, str] = {}
+    root = Path(repository_root)
     for relative_path in paths:
-        tracked = _run_git(repository_root, "ls-files", "--error-unmatch", "--", relative_path)
-        if tracked.returncode != 0:
-            raise ValueError(f"Git provenance unavailable: generator input is not tracked: {relative_path}")
-        blob = _run_git(repository_root, "cat-file", "blob", f"HEAD:{relative_path}")
+        blob = _run_git(root, "cat-file", "blob", f"{head}:{relative_path}")
         if blob.returncode != 0:
             raise ValueError(f"Git provenance unavailable: HEAD blob unavailable: {relative_path}")
         rows[relative_path] = hashlib.sha256(blob.stdout).hexdigest()
     return canonical_digest(rows)
+
+
+def generator_source_digest(*, root: Path | None = None, inputs: tuple[str, ...] = GENERATOR_INPUTS) -> str:
+    """Digest fixed generator inputs from clean Git HEAD blobs, never checkout bytes."""
+    repository_root, head = _generator_repository_root(root or SOURCE_ROOT)
+    paths = _generator_input_paths(inputs)
+    _require_clean_generator_sources(repository_root, paths)
+    _require_generator_inputs_tracked(repository_root, paths)
+    return _head_blob_digest(
+        str(repository_root), head, paths, GENERATOR_SOURCE_BASIS, GENERATOR_SOURCE_CONTRACT_VERSION,
+    )
 
 
 @lru_cache(maxsize=1)
