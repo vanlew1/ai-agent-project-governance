@@ -31,7 +31,7 @@
 
 ### Fixed
 
--
+- Changed the canonical release tests timeout from a fixed 300-second limit to a fail-closed, auditable 600-second default hang guard configurable from 60 through 3600 seconds.
 - Added P3 allowlisted verification, closure, isolated CLI acceptance, and compact reporting; adapters, CI, and multi-agent remain disabled.
 
 ## [1.1.0] - 2026-07-16

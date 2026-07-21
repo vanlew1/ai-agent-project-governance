@@ -866,6 +866,13 @@
     "enums": {},
     "types": {}
   },
+  "release_gate_config.schema.json": {
+    "required": ["schema_version", "release_gate"],
+    "enums": {},
+    "types": {
+      "/properties/release_gate/properties/test_timeout_seconds": "integer"
+    }
+  },
   "workspace_assignment.schema.json": {
     "required": [
       "workspace_assignment_id",

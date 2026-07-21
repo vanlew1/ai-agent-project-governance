@@ -163,13 +163,13 @@ modules:
     layer: verification_and_closure
     purpose: Fixed local release gate, compatibility checks, and least-privilege CI validation.
     status: existing
-    paths: [scripts/run_governance_ci.py, scripts/check_schema_compatibility.py, scripts/check_template_integrity.py, scripts/check_runtime_dependencies.py, scripts/check_ci_security.py, scripts/check_python_syntax.py, .github/workflows/governance-ci.yml]
+    paths: [scripts/run_governance_ci.py, scripts/check_schema_compatibility.py, scripts/check_template_integrity.py, scripts/check_runtime_dependencies.py, scripts/check_ci_security.py, scripts/check_python_syntax.py, config/release_gate.yaml, schemas/release_gate_config.schema.json, .github/workflows/governance-ci.yml]
     depends_on: [validation_tooling, adapter_protocol]
     must_not_depend_on: [network, secrets, production_data, multi_agent]
     risk_level: high
     phase: P5
     public_entrypoints: [scripts/run_governance_ci.py]
-    notes: Read-only release checks and CI; no publishing, deployment, or Git write automation.
+    notes: Read-only release checks and CI with a bounded, configurable tests hang guard; no publishing, deployment, or Git write automation.
 
   orchestration_runtime:
     owner: framework_maintainers

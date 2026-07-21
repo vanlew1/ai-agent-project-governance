@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/release_gate_config.schema.json",
+  "title": "Release Gate Configuration",
+  "description": "Bounded hang-guard policy for the canonical release test gate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "release_gate"],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "release_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["test_timeout_seconds"],
+      "properties": {
+        "test_timeout_seconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 3600,
+          "default": 600,
+          "description": "Finite hang guard for the tests gate; not a performance benchmark."
+        }
+      }
+    }
+  }
+}
