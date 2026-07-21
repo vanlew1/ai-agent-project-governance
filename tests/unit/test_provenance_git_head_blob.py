@@ -4,6 +4,7 @@ import hashlib
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from governance.adoption import provenance
@@ -62,6 +63,35 @@ class GitHeadBlobProvenanceTest(unittest.TestCase):
         self.assertEqual(1, first.misses)
         self.assertEqual(first.misses, second.misses)
         self.assertEqual(first.hits + 1, second.hits)
+
+    def test_cache_hit_rechecks_head_status_and_tracked_inputs(self) -> None:
+        calls: list[tuple[str, ...]] = []
+        original = provenance._run_git
+
+        def recorded(root: Path, *args: str, **kwargs) -> subprocess.CompletedProcess[bytes]:
+            calls.append(args)
+            return original(root, *args, **kwargs)
+
+        with mock.patch.object(provenance, "_run_git", side_effect=recorded):
+            provenance.generator_source_digest(root=self.root)
+            calls.clear()
+            provenance.generator_source_digest(root=self.root)
+        self.assertIn(("rev-parse", "HEAD"), calls)
+        self.assertIn(("status", "--porcelain=v1", "--untracked-files=no", "--", *provenance.GENERATOR_INPUTS), calls)
+        self.assertIn(("ls-files", "--error-unmatch", "--", *provenance.GENERATOR_INPUTS), calls)
+        self.assertNotIn(("cat-file", "--batch"), calls)
+
+    def test_batched_blob_failure_fails_closed(self) -> None:
+        original = provenance._run_git
+
+        def failing_batch(root: Path, *args: str, **kwargs) -> subprocess.CompletedProcess[bytes]:
+            if args == ("cat-file", "--batch"):
+                return subprocess.CompletedProcess(["git"], 1, b"", b"batch failure")
+            return original(root, *args, **kwargs)
+
+        with mock.patch.object(provenance, "_run_git", side_effect=failing_batch):
+            with self.assertRaisesRegex(ValueError, "batch read failed"):
+                provenance.generator_source_digest(root=self.root)
 
     def test_head_input_contract_and_repository_change_invalidate_cache(self) -> None:
         first = provenance.generator_source_digest(root=self.root)

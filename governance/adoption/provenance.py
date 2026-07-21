@@ -41,7 +41,7 @@ def framework_version() -> str:
     return (SOURCE_ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 
-def _run_git(root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
+def _run_git(root: Path, *args: str, input_data: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
     executable = git_executable()
     if executable is None:
         raise ValueError("Git provenance unavailable: executable not found")
@@ -50,6 +50,7 @@ def _run_git(root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
             [executable, "-C", str(root), *args],
             capture_output=True,
             check=False,
+            input=input_data,
             timeout=GIT_COMMAND_TIMEOUT_SECONDS,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
@@ -98,15 +99,16 @@ def _generator_repository_root(root: Path) -> tuple[Path, str]:
 
 
 def _require_clean_generator_sources(root: Path, paths: tuple[str, ...]) -> None:
-    for arguments, message in (
-        (("diff", "--cached", "--quiet", "HEAD", "--", *paths), "generator source index contains staged changes"),
-        (("diff", "--quiet", "HEAD", "--", *paths), "generator source working tree is dirty"),
-    ):
-        result = _run_git(root, *arguments)
-        if result.returncode == 1:
-            raise ValueError(message)
-        if result.returncode != 0:
-            raise ValueError(f"Git provenance unavailable: {message} check failed")
+    result = _run_git(root, "status", "--porcelain=v1", "--untracked-files=no", "--", *paths)
+    if result.returncode != 0:
+        raise ValueError("Git provenance unavailable: generator source status check failed")
+    for line in result.stdout.decode("utf-8", errors="replace").splitlines():
+        if len(line) < 2:
+            raise ValueError("Git provenance unavailable: malformed generator source status")
+        if line[0] != " ":
+            raise ValueError("generator source index contains staged changes")
+        if line[1] != " ":
+            raise ValueError("generator source working tree is dirty")
 
 
 def _require_generator_inputs_tracked(root: Path, paths: tuple[str, ...]) -> None:
@@ -123,13 +125,33 @@ def _require_generator_inputs_tracked(root: Path, paths: tuple[str, ...]) -> Non
 def _head_blob_digest(
     repository_root: str, head: str, paths: tuple[str, ...], source_basis: str, contract_version: int,
 ) -> str:
-    rows: dict[str, str] = {}
     root = Path(repository_root)
+    requests = b"".join(f"{head}:{relative_path}\n".encode("utf-8") for relative_path in paths)
+    result = _run_git(root, "cat-file", "--batch", input_data=requests)
+    if result.returncode != 0:
+        raise ValueError("Git provenance unavailable: HEAD blob batch read failed")
+    payload = result.stdout
+    offset = 0
+    rows: dict[str, str] = {}
     for relative_path in paths:
-        blob = _run_git(root, "cat-file", "blob", f"{head}:{relative_path}")
-        if blob.returncode != 0:
+        line_end = payload.find(b"\n", offset)
+        if line_end < 0:
             raise ValueError(f"Git provenance unavailable: HEAD blob unavailable: {relative_path}")
-        rows[relative_path] = hashlib.sha256(blob.stdout).hexdigest()
+        header = payload[offset:line_end].split()
+        if len(header) != 3 or header[1] != b"blob":
+            raise ValueError(f"Git provenance unavailable: HEAD blob unavailable: {relative_path}")
+        try:
+            size = int(header[2])
+        except ValueError as exc:
+            raise ValueError(f"Git provenance unavailable: malformed HEAD blob: {relative_path}") from exc
+        data_start = line_end + 1
+        data_end = data_start + size
+        if data_end >= len(payload) or payload[data_end:data_end + 1] != b"\n":
+            raise ValueError(f"Git provenance unavailable: malformed HEAD blob: {relative_path}")
+        rows[relative_path] = hashlib.sha256(payload[data_start:data_end]).hexdigest()
+        offset = data_end + 1
+    if offset != len(payload):
+        raise ValueError("Git provenance unavailable: unexpected HEAD blob batch output")
     return canonical_digest(rows)
 
 
