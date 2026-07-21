@@ -15,7 +15,7 @@
     "types": {}
   },
   "adoption_provenance_receipt.schema.json": {
-    "required": ["schema_version", "binding_type", "generator_id", "generator_version", "generator_source_digest", "generation_path", "generation_command_contract_digest", "formal_scope_input_digest", "formal_scope_normalized_text_digest", "target_identity", "target_branch", "target_head", "framework_commit", "plan_payload_digest", "generated_at", "provenance_receipt_digest"],
+    "required": ["schema_version", "binding_type", "generator_id", "generator_version", "generator_source_digest", "generator_source_basis", "generator_source_contract_version", "generation_path", "generation_command_contract_digest", "formal_scope_input_digest", "formal_scope_normalized_text_digest", "target_identity", "target_branch", "target_head", "framework_commit", "plan_payload_digest", "generated_at", "provenance_receipt_digest"],
     "enums": {},
     "types": {}
   },

@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 from functools import lru_cache
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from governance.schema_loader import validate_mapping
@@ -16,6 +16,9 @@ from governance.schema_loader import validate_mapping
 
 SOURCE_ROOT = Path(__file__).resolve().parents[2]
 PUBLIC_GENERATION_PATH = "scripts/agent_adopt.py:dry-run"
+GENERATOR_SOURCE_BASIS = "git_head_blob"
+GENERATOR_SOURCE_CONTRACT_VERSION = 2
+GIT_COMMAND_TIMEOUT_SECONDS = 10
 GENERATOR_INPUTS = (
     "VERSION",
     "scripts/agent_adopt.py",
@@ -34,14 +37,86 @@ def canonical_digest(value: Mapping[str, Any], *, omit: tuple[str, ...] = ()) ->
     return hashlib.sha256(raw).hexdigest()
 
 
-@lru_cache(maxsize=1)
 def framework_version() -> str:
     return (SOURCE_ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 
-@lru_cache(maxsize=1)
-def generator_source_digest() -> str:
-    rows = {name: hashlib.sha256((SOURCE_ROOT / name).read_bytes()).hexdigest() for name in GENERATOR_INPUTS}
+def _run_git(root: Path, *args: str) -> subprocess.CompletedProcess[bytes]:
+    executable = git_executable()
+    if executable is None:
+        raise ValueError("Git provenance unavailable: executable not found")
+    try:
+        result = subprocess.run(
+            [executable, "-C", str(root), *args],
+            capture_output=True,
+            check=False,
+            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError(f"Git provenance unavailable: {exc}") from exc
+    return result
+
+
+def _require_git_success(root: Path, operation: str, *args: str) -> bytes:
+    result = _run_git(root, *args)
+    if result.returncode != 0:
+        raise ValueError(f"Git provenance unavailable: {operation} failed")
+    return result.stdout
+
+
+def _generator_input_paths(inputs: tuple[str, ...]) -> tuple[str, ...]:
+    if not inputs:
+        raise ValueError("Git provenance unavailable: generator input set is empty")
+    normalized: list[str] = []
+    for relative_path in inputs:
+        path = PurePosixPath(relative_path)
+        if (
+            path.is_absolute()
+            or relative_path != path.as_posix()
+            or any(part in {"", ".", ".."} for part in path.parts)
+        ):
+            raise ValueError(f"Git provenance unavailable: unsafe generator input path {relative_path!r}")
+        normalized.append(relative_path)
+    return tuple(normalized)
+
+
+def _generator_repository_root(root: Path) -> Path:
+    resolved_root = root.resolve()
+    top_level = Path(
+        _require_git_success(resolved_root, "repository root lookup", "rev-parse", "--show-toplevel").decode("utf-8").strip(),
+    ).resolve()
+    _require_git_success(resolved_root, "HEAD lookup", "rev-parse", "HEAD")
+    if top_level != resolved_root:
+        raise ValueError("Git provenance unavailable: generator source root is not the repository root")
+    return resolved_root
+
+
+def _require_clean_generator_sources(root: Path, paths: tuple[str, ...]) -> None:
+    for arguments, message in (
+        (("diff", "--cached", "--quiet", "HEAD", "--", *paths), "generator source index contains staged changes"),
+        (("diff", "--quiet", "HEAD", "--", *paths), "generator source working tree is dirty"),
+    ):
+        result = _run_git(root, *arguments)
+        if result.returncode == 1:
+            raise ValueError(message)
+        if result.returncode != 0:
+            raise ValueError(f"Git provenance unavailable: {message} check failed")
+
+
+def generator_source_digest(*, root: Path | None = None, inputs: tuple[str, ...] = GENERATOR_INPUTS) -> str:
+    """Digest fixed generator inputs from clean Git HEAD blobs, never checkout bytes."""
+    repository_root = _generator_repository_root(root or SOURCE_ROOT)
+    paths = _generator_input_paths(inputs)
+    _require_clean_generator_sources(repository_root, paths)
+    rows: dict[str, str] = {}
+    for relative_path in paths:
+        tracked = _run_git(repository_root, "ls-files", "--error-unmatch", "--", relative_path)
+        if tracked.returncode != 0:
+            raise ValueError(f"Git provenance unavailable: generator input is not tracked: {relative_path}")
+        blob = _run_git(repository_root, "cat-file", "blob", f"HEAD:{relative_path}")
+        if blob.returncode != 0:
+            raise ValueError(f"Git provenance unavailable: HEAD blob unavailable: {relative_path}")
+        rows[relative_path] = hashlib.sha256(blob.stdout).hexdigest()
     return canonical_digest(rows)
 
 
@@ -93,12 +168,15 @@ def build_provenance_receipt(
 ) -> dict[str, Any]:
     target_git = git_metadata(target_root)
     framework_git = git_metadata(SOURCE_ROOT)
+    source_digest = generator_source_digest()
     receipt: dict[str, Any] = {
         "schema_version": "1.0",
         "binding_type": "TOOLCHAIN_PROVENANCE_BINDING",
         "generator_id": "ai-agent-project-governance-planner",
         "generator_version": framework_version(),
-        "generator_source_digest": generator_source_digest(),
+        "generator_source_digest": source_digest,
+        "generator_source_basis": GENERATOR_SOURCE_BASIS,
+        "generator_source_contract_version": GENERATOR_SOURCE_CONTRACT_VERSION,
         "generation_path": generation_path,
         "generation_command_contract_digest": command_contract_digest(),
         "formal_scope_input_digest": (formal_scope_digests or {}).get("raw_sha256", hashlib.sha256(b"").hexdigest()),
@@ -126,9 +204,14 @@ def validate_provenance_receipt(
         raise ValueError("provenance receipt digest does not match receipt contents")
     if receipt["plan_payload_digest"] != plan.get("plan_digest"):
         raise ValueError("provenance plan payload digest does not match plan digest")
+    if receipt["generator_source_basis"] != GENERATOR_SOURCE_BASIS:
+        raise ValueError("generator source basis does not match current provenance contract")
+    if receipt["generator_source_contract_version"] != GENERATOR_SOURCE_CONTRACT_VERSION:
+        raise ValueError("generator source contract version does not match current provenance contract")
+    current_source_digest = generator_source_digest()
     if receipt["generator_version"] != framework_version():
         raise ValueError("generator version does not match repository VERSION")
-    if receipt["generator_source_digest"] != generator_source_digest():
+    if receipt["generator_source_digest"] != current_source_digest:
         raise ValueError("generator source digest does not match current toolchain")
     if receipt["generation_command_contract_digest"] != command_contract_digest():
         raise ValueError("generation command contract digest does not match public CLI")

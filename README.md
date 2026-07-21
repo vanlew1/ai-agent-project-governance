@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
@@ -69,7 +69,7 @@ The final command runs the repository's existing governance checks and reports t
 
 | Area | Current, cautious statement |
 | --- | --- |
-| Version | `1.2.0` |
+| Version | `1.3.0` |
 | Automation | The repository includes the `Governance CI` GitHub Actions workflow. |
 | Release | A `v1.0.0` Release exists; its test artifacts are historical and do not state the live status of current `main`. |
 | Runtime coverage | Python, Node.js, WeChat Mini Program, and the generic fallback have local adapter acceptance evidence. See [compatibility](docs/COMPATIBILITY.md). |

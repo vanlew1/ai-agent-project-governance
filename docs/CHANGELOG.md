@@ -2,10 +2,10 @@
 
 ## Unreleased
 
-### CASE-001 minimum unblock remediation (1.2.0 candidate)
+### CASE-001 minimum unblock remediation (1.3.0 candidate)
 
 - Added formal `--scope-file` flow with one canonical scope contract enforced at planning, confirmation, export, Runtime compilation, approval, and installation boundaries.
-- Added truthful Toolchain Provenance Binding for public CLI generation. It binds repository `VERSION`, generator sources, command contract, formal-scope bytes, target branch/HEAD, framework commit, plan payload, and receipt digest; it is not a keyed anti-forgery signature.
+- Added truthful Toolchain Provenance Binding v2 for public CLI generation. Its generator-source digest binds clean Git `HEAD` blobs for fixed inputs, rejects modified or staged generator source, and is stable across LF/CRLF checkouts; it binds repository `VERSION`, command contract, formal-scope bytes, target branch/HEAD, framework commit, plan payload, and receipt digest. It is not a keyed anti-forgery signature.
 - Added pre-write `INSTALL_WRITESET.json`, `PRE_INSTALL_HASHES.json`, and `ROLLBACK_MANIFEST.json` artifacts shared by compiler, approval, installer, receipt, and manual rollback assessment.
 - Added byte-stable UTF-8/LF exclusive and atomic writers for formal adoption artifacts, plus raw and normalized-text identities for reviewed human text.
 - Added public unapproved confirmation/approval candidates; Preview generation leaves Owner, install, and activation approval false.

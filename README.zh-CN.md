@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
@@ -69,7 +69,7 @@ python scripts/run_governance_ci.py
 
 | 项目 | 当前且谨慎的说明 |
 | --- | --- |
-| 版本 | `1.2.0` |
+| 版本 | `1.3.0` |
 | 自动化 | 仓库包含名为 `Governance CI` 的 GitHub Actions workflow。 |
 | Release | 已有 `v1.0.0` Release；其中的测试产物属于历史记录，不代表当前 `main` 的实时状态。 |
 | 运行时覆盖 | Python、Node.js、微信小程序和通用 fallback 均有本地 Adapter 验收证据。详见[兼容性](docs/COMPATIBILITY.md)。 |
