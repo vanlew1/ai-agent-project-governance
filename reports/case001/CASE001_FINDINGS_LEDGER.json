@@ -1,0 +1,65 @@
+[
+  {
+    "id": "CASE-001-FINDING-001",
+    "status": "FIXED",
+    "evidence": ["tests/unit/test_case001_minimum_unblock.py::test_private_planner_cannot_masquerade_as_public_cli"],
+    "resolution": "Only the public dry-run path can produce a plan accepted by downstream formal boundaries; the ad hoc regeneration script was removed.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-002",
+    "status": "FIXED",
+    "evidence": ["case001_replay_phase1_scope.yaml", "governance/adoption/scope_contract.py"],
+    "resolution": "A schema-validated formal scope input now carries the exact Phase 1 task and policy contract.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-003",
+    "status": "PARTIALLY_FIXED",
+    "evidence": ["governance/adoption/provenance.py", "schemas/adoption_provenance_receipt.schema.json"],
+    "resolution": "Toolchain Provenance Binding now detects ordinary plan/receipt tampering and binds target/framework Git state, but it is intentionally not described as keyed cryptographic anti-forgery.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-004",
+    "status": "FIXED",
+    "evidence": ["governance/adoption/writeset.py", "schemas/adoption_install_writeset.schema.json", "schemas/adoption_rollback_manifest.schema.json"],
+    "resolution": "The compiler now generates canonical write-set, pre-install hashes, and manual rollback manifests before target writes.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-005",
+    "status": "PARTIALLY_FIXED",
+    "evidence": ["tests/unit/test_case001_minimum_unblock.py::test_canonical_writeset_classifies_existing_assets_as_manual"],
+    "resolution": "Existing AGENTS/config/scripts assets are deterministically classified as manual adoption assets and are never auto-overwritten; automatic semantic reconciliation remains out of scope.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-006",
+    "status": "DEFERRED",
+    "evidence": ["reports/case001/CASE001_FINDINGS_RECONCILIATION_REPORT.md"],
+    "resolution": "Malformed legacy merge candidates remain superseded. This minimum unblock does not add an automatic AGENTS merge engine.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-007",
+    "status": "FIXED",
+    "evidence": ["governance/adoption/scope_contract.py", "tests/unit/test_case001_minimum_unblock.py::test_active_and_observation_scope_modes_fail_closed"],
+    "resolution": "Active development requires non-empty allowed paths at every boundary; empty scope is accepted only for explicitly Owner-confirmed observation mode.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-008",
+    "status": "FIXED",
+    "evidence": ["reports/case001/CASE001_MINIMUM_UNBLOCK_REMEDIATION_REPORT.md", "reports/case001/CASE001_FINDINGS_RECONCILIATION_REPORT.md"],
+    "resolution": "The remediation report is the authoritative current index and labels prior Phase 0.5 acceptance artifacts as superseded evidence only.",
+    "framework_version": "1.2.0-candidate"
+  },
+  {
+    "id": "CASE-001-FINDING-009",
+    "status": "FIXED",
+    "evidence": ["governance/adoption/c0_scanner.py", "tests/unit/test_case001_minimum_unblock.py::test_public_cli_preview_flow_is_unapproved_lf_and_c0_clean"],
+    "resolution": "Formal outputs use UTF-8/LF writers and C0 scans. The three C0 bytes remain preserved only in the legacy Replay evidence rollup and are not copied into current handoff artifacts.",
+    "framework_version": "1.2.0-candidate"
+  }
+]
