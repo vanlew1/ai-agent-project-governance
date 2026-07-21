@@ -159,12 +159,17 @@ def _draft_payloads(plan: dict[str, Any], confirmation: dict[str, Any], output_d
         "unresolved_fields": unresolved,
         "blocked_decisions": list(BLOCKED_DECISIONS),
     }
+    authorization_summary = (
+        f"Owner confirmation recorded for preset `{confirmation['preset']['selected']}` and one plan-proposed scope."
+        if confirmation["confirmed_by_user"]
+        else f"Draft proposes preset `{confirmation['preset']['selected']}` and one plan-proposed scope. No Owner confirmation recorded."
+    )
     summary = "\n".join((
         "# Adoption confirmation draft export",
         "",
         "Status: `UNTRUSTED_DRAFT`, `NOT_INSTALLED`, `NOT_ACTIVATED`, `REQUIRES_FINAL_REVIEW`.",
         "",
-        f"The user confirmed preset `{confirmation['preset']['selected']}` and one plan-proposed scope.",
+        authorization_summary,
         "No blocked decision was approved: production data, external APIs, Git writes, release, state activation, security bypass, and business-semantic changes remain blocked.",
         "",
         "Generated drafts: `task.yaml.draft`, `project_state.yaml.draft`, and this summary with `EXPORT_MANIFEST.json`.",

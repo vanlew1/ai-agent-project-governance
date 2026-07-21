@@ -148,6 +148,10 @@ class Case001MinimumUnblockTest(unittest.TestCase):
         candidate = yaml.safe_load(approval.read_text(encoding="utf-8"))
         self.assertFalse(candidate["install_approved"])
         self.assertFalse(candidate["activate_approved"])
+        summary = (drafts / "ADOPTION_CONFIRMATION_SUMMARY.md").read_text(encoding="utf-8")
+        self.assertIn("Draft proposes preset", summary)
+        self.assertIn("No Owner confirmation recorded", summary)
+        self.assertNotIn("The user confirmed", summary)
         self.assertEqual([], scan_directory_for_c0(self.base))
         formal_outputs = [plan, confirmation, approval, *drafts.rglob("*"), *runtime.rglob("*")]
         self.assertFalse(any(b"\r\n" in path.read_bytes() for path in formal_outputs if path.is_file()))
