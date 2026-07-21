@@ -8,12 +8,16 @@ from pathlib import Path
 from typing import Any
 
 from governance.adapters import detect_adapters, get
+from governance.adoption.io import raw_and_normalized_digests
+from governance.adoption.provenance import build_provenance_receipt
+from governance.adoption.scope_contract import load_formal_scope
 from governance.audit.checks import run_audit
 from governance.schema_loader import validate_mapping
 
 
 SOURCE_ROOT = Path(__file__).resolve().parents[2]
 MAX_COMPARISON_BYTES = 128 * 1024
+HUMAN_TEXT_SUFFIXES = {".md", ".txt", ".rst"}
 ASSETS = (
     ("AGENTS.md", "AGENTS.md", "Agent-facing project boundary instructions."),
     ("agent_rules", "agent_rules", "Reusable governance rules; tailor project-specific rules manually."),
@@ -75,7 +79,21 @@ def _asset_entry(source_relative: str, target_relative: str, ownership_note: str
     elif source.is_file() and target.is_file():
         source_hash = _sha256(source)
         target_hash = _sha256(target)
+        if source_hash is not None:
+            entry["source_raw_sha256"] = source_hash
+        if target_hash is not None:
+            entry["target_raw_sha256"] = target_hash
         same = source_hash is not None and source_hash == target_hash
+        if source.suffix.lower() in HUMAN_TEXT_SUFFIXES and source_hash is not None and target_hash is not None:
+            try:
+                source_identity = raw_and_normalized_digests(source.read_bytes())
+                target_identity_value = raw_and_normalized_digests(target.read_bytes())
+            except UnicodeDecodeError:
+                pass
+            else:
+                entry["source_normalized_text_sha256"] = source_identity["normalized_text_sha256"]
+                entry["target_normalized_text_sha256"] = target_identity_value["normalized_text_sha256"]
+                same = source_identity["normalized_text_sha256"] == target_identity_value["normalized_text_sha256"]
         entry["operation"] = "EXISTS_SAME" if same else "EXISTS_DIFFERENT"
         entry["conflict"] = not same
     else:
@@ -227,8 +245,16 @@ def _scope_candidates(task_draft: dict[str, object]) -> list[dict[str, object]]:
         "candidate_id": "scope-default",
         "allowed_paths": list(task_draft["write_scope"]["allow"]),
         "denied_paths": list(task_draft["write_scope"]["deny"]),
+        "scope_contract": task_draft.get("scope_contract"),
         "requires_confirmation": True,
     }]
+
+def _parse_and_validate_scope(scope_file: Path | None) -> tuple[dict[str, object] | None, str]:
+    """Compatibility wrapper for focused parser tests."""
+    if not scope_file:
+        return None, sha256(b"").hexdigest()
+    scope, digests = load_formal_scope(scope_file)
+    return scope, digests["raw_sha256"]
 
 
 def _project_state_draft() -> dict[str, object]:
@@ -287,33 +313,76 @@ def _warnings(detection: Any, candidates: list[dict[str, object]]) -> list[str]:
     return warnings
 
 
-def build_plan(project_root: Path) -> dict[str, object]:
+def _scope_bound_drafts(scope_data: dict[str, Any] | None) -> tuple[dict[str, object], dict[str, object]]:
+    task_draft = _task_draft()
+    project_state_draft = _project_state_draft()
+    if scope_data is None:
+        project_state_draft["execution_mode"] = "UNRESOLVED"
+        return task_draft, project_state_draft
+    task_draft.update({
+        "task_id": scope_data["task_id"],
+        "objective": scope_data["task_goal"],
+        "authorization": "INJECTED_FROM_SCOPE",
+        "note": "Task draft injected from formal scope input. Review required.",
+        "scope_contract": scope_data,
+    })
+    task_draft["write_scope"] = {"allow": scope_data["allowed_paths"], "deny": scope_data["denied_paths"]}
+    if scope_data["known_safe_commands"]:
+        task_draft["test_command"] = scope_data["known_safe_commands"][0]
+    project_state_draft.update({
+        "project_mode": scope_data["execution_mode"],
+        "execution_mode": scope_data["execution_mode"],
+        "authorization": "INJECTED_FROM_SCOPE",
+    })
+    return task_draft, project_state_draft
+
+
+def build_plan(
+    project_root: Path,
+    scope_file: Path | None = None,
+    *,
+    generation_path: str = "governance.adoption.planner.build_plan",
+) -> dict[str, object]:
     """Build and schema-validate an untrusted adoption plan using reads only."""
     root = project_root.expanduser().resolve()
     if not root.is_dir():
         raise ValueError("--project-root must be an existing directory")
+
+    if scope_file:
+        scope_data, formal_scope_digests = load_formal_scope(scope_file)
+    else:
+        scope_data, formal_scope_digests = None, None
+
     detection, adapter = _adapter_mapping(root)
     audit = _audit_mapping(root)
     candidates = _test_candidates(root, detection)
     validate_unique_candidate_ids(candidates)
     manifest = _asset_manifest(root)
-    task_draft = _task_draft()
+    # Local import avoids a module cycle while keeping one canonical classifier.
+    from governance.adoption.writeset import classify_install_paths
+    install_classifications = classify_install_paths(manifest, root)
+    task_draft, project_state_draft = _scope_bound_drafts(scope_data)
+
+    target_id = target_identity(root)
+
     value: dict[str, object] = {
         "schema_version": "1.0",
         "mode": "dry-run",
         "project_root": "<target-project>",
         "read_only": True,
-        "target_identity": target_identity(root),
+        "target_identity": target_id,
+        "scope_contract": scope_data,
         "field_semantics": FIELD_SEMANTICS,
         "adapter": adapter,
         "audit": audit,
         "preset_recommendation": _preset_recommendation(audit, detection),
         "test_candidates": candidates,
         "asset_manifest": manifest,
+        "install_classifications": install_classifications,
         "conflicts": [item for item in manifest if item["conflict"]],
         "task_draft": task_draft,
         "scope_candidates": _scope_candidates(task_draft),
-        "project_state_draft": _project_state_draft(),
+        "project_state_draft": project_state_draft,
         "required_confirmations": _confirmations(),
         "blocked_decisions": _blocked_decisions(),
         "next_commands": _next_commands(root, candidates),
@@ -328,5 +397,14 @@ def build_plan(project_root: Path) -> dict[str, object]:
     value["plan_digest"] = sha256(
         json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
+
+    value["provenance_receipt"] = build_provenance_receipt(
+        target_identity=target_id,
+        target_root=root,
+        plan_payload_digest=value["plan_digest"],
+        formal_scope_digests=formal_scope_digests,
+        generation_path=generation_path,
+    )
+
     validate_mapping(value, "adoption_plan.schema.json")
     return value

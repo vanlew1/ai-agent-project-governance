@@ -3,15 +3,16 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from governance.adoption.installer import digest
+from governance.adoption.io import text_bytes, write_json_exclusive, write_text_atomic
 from governance.adoption.planner import target_identity
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME, canonical_digest, compiler_identity, digest_bytes
+from governance.adoption.writeset import SIDECAR_FILES, load_and_validate_sidecars
 from governance.models.project_state import ProjectState
 from governance.models.task_contract import TaskContract
 from governance.schema_loader import load_mapping, validate_mapping
@@ -38,38 +39,15 @@ def _external_existing(path: Path, target: Path, label: str) -> Path:
 
 
 def _exclusive_json(path: Path, value: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            json.dump(value, handle, ensure_ascii=False, sort_keys=True)
-            handle.write("\n")
-    except Exception:
-        raise
+    write_json_exclusive(path, value)
 
 
 def _finalize_json(path: Path, value: dict[str, Any]) -> None:
-    flags = os.O_WRONLY | os.O_TRUNC
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    descriptor = os.open(path, flags)
-    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-        json.dump(value, handle, ensure_ascii=False, sort_keys=True)
-        handle.write("\n")
+    write_text_atomic(path, json.dumps(value, ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def _replace_mapping(path: Path, value: dict[str, Any]) -> None:
-    temporary = path.with_name(f".{path.name}.activation.tmp")
-    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(yaml.safe_dump(value, allow_unicode=True, sort_keys=False))
-            handle.flush(); os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    except Exception:
-        if temporary.exists():
-            temporary.unlink()
-        raise
+    write_text_atomic(path, yaml.safe_dump(value, allow_unicode=True, sort_keys=False))
 
 
 def _runtime_manifest(path: Path, target: Path) -> tuple[dict[str, Any], Path]:
@@ -77,13 +55,14 @@ def _runtime_manifest(path: Path, target: Path) -> tuple[dict[str, Any], Path]:
     if value.name != MANIFEST_FILENAME:
         raise ValueError("runtime artifact manifest filename is invalid")
     root = value.parent
-    expected = {MANIFEST_FILENAME, "task_contract.runtime.yaml", "project_state.runtime.yaml"}
+    expected = {MANIFEST_FILENAME, "task_contract.runtime.yaml", "project_state.runtime.yaml", *SIDECAR_FILES}
     if {item.name for item in root.iterdir()} != expected:
         raise ValueError("runtime artifact bundle contains unapproved extra files")
     manifest = load_mapping(value)
     validate_mapping(manifest, "runtime_artifact_manifest.schema.json")
     if manifest["manifest_digest"] != canonical_digest(manifest, "manifest_digest"):
         raise ValueError("runtime artifact manifest digest does not match its contents")
+    load_and_validate_sidecars(root)
     return manifest, root
 
 
@@ -136,7 +115,7 @@ def activate_approved(target_root: Path, task_contract: Path, project_state: Pat
     activated_state = dict(state)
     activated_state.update({"status": "ACTIVATED_NOT_PREFLIGHTED", "activated": True, "activation_status": "ACTIVATED_NOT_PREFLIGHTED", "activation_approval_digest": approval_digest, "activation_receipt_digest": binding_digest, "lifecycle_stage": "ACTIVATED_NOT_PREFLIGHTED", "lifecycle_evidence": [{"stage": "ACTIVATED_NOT_PREFLIGHTED", "evidence_type": "activation_approval", "evidence_digest": approval_digest, "previous_state_digest": digest_bytes(project_state.read_bytes())}]})
     validate_mapping(activated_state, "project_state.schema.json"); ProjectState.from_mapping(activated_state)
-    before_digest, after_bytes = digest_bytes(project_state.read_bytes()), yaml.safe_dump(activated_state, allow_unicode=True, sort_keys=False).encode("utf-8")
+    before_digest, after_bytes = digest_bytes(project_state.read_bytes()), text_bytes(yaml.safe_dump(activated_state, allow_unicode=True, sort_keys=False))
     after_digest = digest_bytes(after_bytes)
     receipt = {"schema_version": "1.0", "status": "PENDING_ACTIVATION", "target_identity_digest": approval["target_identity_digest"], "runtime_artifact_manifest_digest": manifest["manifest_digest"], "final_install_approval_digest": digest(final), "installation_receipt_digest": digest(install), "activation_approval_digest": approval_digest, "activation_receipt_binding_digest": binding_digest, "compiler_id": manifest["compiler_id"], "compiler_version": manifest["compiler_version"], "compiler_digest": manifest["compiler_digest"], "task_contract_digest": digest_bytes(task_contract.read_bytes()), "project_state_digest_before": before_digest, "project_state_digest_after": after_digest, "activated": False, "preflight_executed": False, "tests_executed": False, "verification_completed": False, "closure_completed": False}
     validate_mapping(receipt, "activation_receipt.schema.json")

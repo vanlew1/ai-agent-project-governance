@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_approval_candidate.schema.json",
+  "title": "Unapproved Adoption Installation Candidate",
+  "description": "Exact preview binding for Owner review; it grants no installation or activation authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "runtime_artifact_manifest_digest", "provenance_receipt_digest", "scope_contract", "scope_contract_digest", "writeset_digest", "pre_install_hashes_digest", "rollback_manifest_digest", "compiler", "runtime_artifacts", "approved_by_user", "install_approved", "activate_approved", "approved_action", "approved_files", "conflict_policy", "rollback_on_failure", "blocked_decisions"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "plan_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "confirmation_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "export_manifest_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "runtime_artifact_manifest_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "provenance_receipt_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "scope_contract": {"type": "object"}, "scope_contract_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "writeset_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "pre_install_hashes_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "rollback_manifest_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "compiler": {"type": "object"}, "runtime_artifacts": {"type": "object"},
+    "approved_by_user": {"const": false}, "install_approved": {"const": false}, "activate_approved": {"const": false}, "approved_action": {"const": "NONE"},
+    "approved_files": {"type": "array", "items": {"enum": ["task.yaml", "project_state.yaml"]}}, "conflict_policy": {"const": "FAIL_ON_EXISTING"}, "rollback_on_failure": {"const": true},
+    "blocked_decisions": {"type": "object"}
+  }
+}

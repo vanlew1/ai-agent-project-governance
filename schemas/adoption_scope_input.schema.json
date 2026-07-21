@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/vanlew1/ai-agent-project-governance/schemas/adoption_scope_input.schema.json",
+    "title": "Adoption Scope Input",
+    "description": "Explicit input scope for dry-run.",
+    "type": "object",
+    "required": ["task_id", "task_goal", "execution_mode", "allowed_paths", "denied_paths", "known_safe_commands", "network_policy", "data_write_policy", "git_policy", "owner_confirmed_empty_scope"],
+    "properties": {
+        "task_id": { "type": "string", "minLength": 1 },
+        "task_goal": { "type": "string", "minLength": 1 },
+        "execution_mode": { "type": "string", "enum": ["ACTIVE_DEVELOPMENT", "OBSERVATION_ONLY"] },
+        "allowed_paths": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "denied_paths": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "known_safe_commands": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "network_policy": { "type": "string", "enum": ["BLOCKED", "ALLOWED"] },
+        "data_write_policy": { "type": "string", "enum": ["BLOCKED", "ALLOWED"] },
+        "git_policy": { "type": "string", "enum": ["BLOCKED", "PHASE_1"] },
+        "owner_confirmed_empty_scope": { "type": "boolean" }
+    },
+    "additionalProperties": false
+}

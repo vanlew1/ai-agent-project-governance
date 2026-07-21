@@ -207,4 +207,4 @@ modules:
     risk_level: medium
     phase: AGC-UX-04B
     public_entrypoints: [scripts/agent_adopt.py]
-    notes: Dry-run planning and explicit draft export only; neither writes the scanned project nor authorizes copying assets, formal configuration, state activation, tests, or external access.
+    notes: Owns formal scope validation, truthful toolchain provenance, byte-stable artifact I/O, canonical pre-write manifests, unapproved Preview candidates, and bounded installation. No candidate grants installation or activation authority.

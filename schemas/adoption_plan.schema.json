@@ -5,13 +5,14 @@
   "description": "Untrusted local planning output that must not authorize or apply project changes.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "mode", "project_root", "read_only", "target_identity", "plan_digest", "field_semantics", "adapter", "audit", "preset_recommendation", "test_candidates", "asset_manifest", "conflicts", "task_draft", "scope_candidates", "project_state_draft", "required_confirmations", "blocked_decisions", "next_commands", "rollback_checklist", "warnings"],
+  "required": ["schema_version", "mode", "project_root", "read_only", "target_identity", "scope_contract", "plan_digest", "field_semantics", "adapter", "audit", "preset_recommendation", "test_candidates", "asset_manifest", "install_classifications", "conflicts", "task_draft", "scope_candidates", "project_state_draft", "required_confirmations", "blocked_decisions", "next_commands", "rollback_checklist", "warnings", "provenance_receipt"],
   "properties": {
     "schema_version": {"const": "1.0"},
     "mode": {"const": "dry-run"},
     "project_root": {"const": "<target-project>"},
     "read_only": {"const": true},
     "target_identity": {"type": "object", "additionalProperties": false, "required": ["canonical_root_fingerprint", "project_markers_digest", "git_repository", "identity_digest"], "properties": {"canonical_root_fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "project_markers_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "git_repository": {"type": "boolean"}, "identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "scope_contract": {"type": ["object", "null"]},
     "plan_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "field_semantics": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "object", "additionalProperties": false, "required": ["meaning", "does_not_mean"], "properties": {"meaning": {"type": "string", "minLength": 1}, "does_not_mean": {"type": "string", "minLength": 1}}}},
     "adapter": {"type": "object"},
@@ -19,19 +20,21 @@
     "preset_recommendation": {"type": "object", "additionalProperties": false, "required": ["recommendation", "reason", "evidence", "confidence", "confidence_meaning", "confidence_does_not_mean", "alternatives", "requires_confirmation"], "properties": {"recommendation": {"enum": ["lightweight", "standard", "strict"]}, "reason": {"type": "string"}, "evidence": {"type": "array", "items": {"type": "string"}}, "confidence": {"enum": ["low", "medium"]}, "confidence_meaning": {"type": "string"}, "confidence_does_not_mean": {"type": "string"}, "alternatives": {"type": "array", "items": {"type": "string"}}, "requires_confirmation": {"const": true}}},
     "test_candidates": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["candidate_id", "command", "evidence", "confidence", "estimated_scope", "network_risk", "write_risk", "requires_confirmation"], "properties": {"candidate_id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9][a-z0-9._-]*$"}, "command": {"type": "string", "minLength": 1}, "evidence": {"type": "array", "items": {"type": "string"}}, "confidence": {"enum": ["medium", "high"]}, "estimated_scope": {"type": "string"}, "network_risk": {"const": "unknown_until_review"}, "write_risk": {"const": "unknown_until_review"}, "requires_confirmation": {"const": true}}}},
     "asset_manifest": {"type": "array", "items": {"$ref": "#/$defs/asset"}},
+    "install_classifications": {"type": "object"},
     "conflicts": {"type": "array", "items": {"$ref": "#/$defs/asset"}},
     "task_draft": {"$ref": "#/$defs/draft"},
-    "scope_candidates": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["candidate_id", "allowed_paths", "denied_paths", "requires_confirmation"], "properties": {"candidate_id": {"type": "string"}, "allowed_paths": {"type": "array", "items": {"type": "string"}}, "denied_paths": {"type": "array", "items": {"type": "string"}}, "requires_confirmation": {"const": true}}}},
+    "scope_candidates": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["candidate_id", "allowed_paths", "denied_paths", "scope_contract", "requires_confirmation"], "properties": {"candidate_id": {"type": "string"}, "allowed_paths": {"type": "array", "items": {"type": "string"}}, "denied_paths": {"type": "array", "items": {"type": "string"}}, "scope_contract": {"type": ["object", "null"]}, "requires_confirmation": {"const": true}}}},
     "project_state_draft": {"$ref": "#/$defs/draft"},
     "required_confirmations": {"type": "array", "items": {"$ref": "#/$defs/confirmation"}},
     "blocked_decisions": {"type": "array", "items": {"$ref": "#/$defs/blocked"}},
     "next_commands": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["command", "requires_confirmation", "note"], "properties": {"command": {"type": "string"}, "requires_confirmation": {"type": "boolean"}, "note": {"type": "string"}}}},
     "rollback_checklist": {"type": "array", "items": {"type": "string"}},
-    "warnings": {"type": "array", "items": {"type": "string"}}
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "provenance_receipt": {"type": "object"}
   },
   "$defs": {
-    "asset": {"type": "object", "additionalProperties": false, "required": ["source", "target", "operation", "conflict", "ownership_note", "requires_confirmation"], "properties": {"source": {"type": "string"}, "target": {"type": "string"}, "operation": {"enum": ["CREATE", "EXISTS_SAME", "EXISTS_DIFFERENT", "MISSING_SOURCE", "REQUIRES_CONFIRMATION"]}, "conflict": {"type": "boolean"}, "ownership_note": {"type": "string"}, "requires_confirmation": {"const": true}}},
-    "draft": {"type": "object", "required": ["draft_status", "authorization"], "properties": {"draft_status": {"const": "UNTRUSTED_DRAFT"}, "authorization": {"const": "REQUIRES_CONFIRMATION"}}, "additionalProperties": true},
+    "asset": {"type": "object", "additionalProperties": false, "required": ["source", "target", "operation", "conflict", "ownership_note", "requires_confirmation"], "properties": {"source": {"type": "string"}, "target": {"type": "string"}, "operation": {"enum": ["CREATE", "EXISTS_SAME", "EXISTS_DIFFERENT", "MISSING_SOURCE", "REQUIRES_CONFIRMATION"]}, "conflict": {"type": "boolean"}, "ownership_note": {"type": "string"}, "requires_confirmation": {"const": true}, "source_raw_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "target_raw_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "source_normalized_text_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "target_normalized_text_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "draft": {"type": "object", "required": ["draft_status", "authorization"], "properties": {"draft_status": {"const": "UNTRUSTED_DRAFT"}, "authorization": {"enum": ["REQUIRES_CONFIRMATION", "INJECTED_FROM_SCOPE"]}}, "additionalProperties": true},
     "confirmation": {"type": "object", "additionalProperties": false, "required": ["area", "reason", "status"], "properties": {"area": {"type": "string"}, "reason": {"type": "string"}, "status": {"const": "REQUIRES_CONFIRMATION"}}},
     "blocked": {"type": "object", "additionalProperties": false, "required": ["decision", "reason", "status"], "properties": {"decision": {"type": "string"}, "reason": {"type": "string"}, "status": {"const": "MUST_NOT_AUTO_DECIDE"}}}
   }

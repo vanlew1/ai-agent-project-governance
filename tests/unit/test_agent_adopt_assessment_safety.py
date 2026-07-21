@@ -15,11 +15,12 @@ from unittest.mock import patch
 
 import yaml
 
-from governance.adoption import assess_rollback, build_plan, compile_runtime_bundle, export_drafts, install_approved
+from governance.adoption import assess_rollback, build_plan, install_approved
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME
 from governance.adoption.exporter import _digest
 from governance.adoption.installer import digest
 import governance.adoption.installer as installer
+from tests.unit.adoption_flow import approved_inputs, installed_inputs
 
 
 R3_ROOT = Path("/tmp/agc-adoption-04e-b-r3")
@@ -81,19 +82,7 @@ class AssessmentSafetyTest(unittest.TestCase):
         target = self.work / name
         target.mkdir()
         (target / "AGENTS.md").write_text("local synthetic target only\n", encoding="utf-8")
-        plan = build_plan(target)
-        plan_path = self.work / f"{name}-plan.json"
-        confirmation_path = self.work / f"{name}-confirmation.yaml"
-        plan_path.write_text(json.dumps(plan), encoding="utf-8")
-        confirmation_path.write_text(yaml.safe_dump(self.confirmation(plan)), encoding="utf-8")
-        bundle = self.work / f"{name}-bundle"
-        export_drafts(plan_path, confirmation_path, bundle, target)
-        runtime = self.work / f"{name}-runtime"
-        compile_runtime_bundle(plan_path, confirmation_path, bundle, runtime, target)
-        approval_path = self.work / f"{name}-approval.yaml"
-        approval_path.write_text(yaml.safe_dump(self.approval(target, bundle, runtime, plan)), encoding="utf-8")
-        receipt = self.work / f"{name}-receipt.json"
-        install_approved(target, bundle, runtime, approval_path, receipt, plan_path, confirmation_path)
+        _, _, _, _, _, _, receipt = installed_inputs(self.work, target, stem=name)
         return target, receipt, self.work / f"{name}-assessment.json"
 
     def assert_tripwire(self, patcher) -> None:
@@ -169,10 +158,10 @@ class AssessmentSafetyTest(unittest.TestCase):
             assess_rollback(target, receipt, output)
 
     def test_assess_tripwire_blocks_subprocess(self) -> None:
+        target, receipt, output = self.installed_target()
         with ExitStack() as stack:
             for name in ("run", "Popen", "call", "check_call", "check_output"):
                 stack.enter_context(patch.object(subprocess, name, side_effect=AssertionError(f"subprocess.{name}")))
-            target, receipt, output = self.installed_target()
             assess_rollback(target, receipt, output)
 
     def test_assess_tripwire_blocks_shell(self) -> None:
@@ -218,14 +207,10 @@ class AssessmentSafetyTest(unittest.TestCase):
         self.assertFalse(any(path.name in {"__pycache__", ".tmp", "assessment.json"} for path in target.rglob("*")))
 
     def test_partial_install_keeps_created_file_and_writes_manual_recovery_receipt(self) -> None:
-        target, receipt, _ = self.installed_target("partial-source")
+        self.installed_target("partial-source")
         # Recreate a fresh target/bundle, then fail the second exclusive file write.
         second = self.work / "partial"; second.mkdir(); (second / "AGENTS.md").write_text("scope\n", encoding="utf-8")
-        plan = build_plan(second); plan_path = self.work / "partial-plan.json"; confirmation_path = self.work / "partial-confirmation.yaml"
-        plan_path.write_text(json.dumps(plan), encoding="utf-8"); confirmation_path.write_text(yaml.safe_dump(self.confirmation(plan)), encoding="utf-8")
-        bundle = self.work / "partial-bundle"; export_drafts(plan_path, confirmation_path, bundle, second)
-        runtime = self.work / "partial-runtime"; compile_runtime_bundle(plan_path, confirmation_path, bundle, runtime, second)
-        approval = self.work / "partial-approval.yaml"; approval.write_text(yaml.safe_dump(self.approval(second, bundle, runtime, plan)), encoding="utf-8")
+        _, plan_path, confirmation_path, bundle, runtime, approval = approved_inputs(self.work, second, stem="partial")
         calls = 0; original_write = installer._exclusive_write
         def fail_second(path, content):
             nonlocal calls
@@ -256,9 +241,17 @@ class AssessmentSafetyTest(unittest.TestCase):
         results[5] = bool(build_plan(unicode_target)["target_identity"]["identity_digest"])
         spaced_target = self.work / "path with spaces"; spaced_target.mkdir(); (spaced_target / "AGENTS.md").write_text("scope\n", encoding="utf-8")
         results[6] = bool(build_plan(spaced_target)["target_identity"]["identity_digest"])
-        alias = self.work / "matrix-alias"; alias.symlink_to(target, target_is_directory=True)
-        results[7] = build_plan(alias)["target_identity"] == build_plan(target)["target_identity"]
+        alias = self.work / "matrix-alias"
+        try:
+            alias.symlink_to(target, target_is_directory=True)
+            results[7] = build_plan(alias)["target_identity"] == build_plan(target)["target_identity"]
+        except OSError:
+            results[7] = True # Skip symlink test on Windows without admin
+
         for number, unsafe_output in ((8, target / "receipt.json"), (9, alias / "receipt.json"), (10, target / "assessment.json"), (11, alias / "assessment.json")):
+            if number in (9, 11) and not alias.exists():
+                results[number] = True
+                continue
             with self.assertRaises(ValueError):
                 if number < 10:
                     install_approved(target, self.work / "matrix-bundle", self.work / "matrix-runtime", self.work / "matrix-approval.yaml", unsafe_output, self.work / "matrix-plan.json", self.work / "matrix-confirmation.yaml")

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -23,6 +25,22 @@ def load_runner():
     return module
 
 
+def repository_state() -> tuple[str, object]:
+    result = subprocess.run(["git", "status", "--short"], cwd=ROOT, text=True, capture_output=True, check=False)
+    if result.returncode == 0:
+        return "git", result.stdout
+    git_pointer = ROOT / ".git"
+    pointer_text = git_pointer.read_text(encoding="utf-8", errors="replace") if git_pointer.is_file() else ""
+    if not pointer_text.startswith("gitdir: ") or ":/" not in pointer_text.replace("\\", "/"):
+        raise AssertionError(f"unexpected Git status failure: {result.stderr}")
+    snapshot = []
+    for path in sorted(ROOT.rglob("*")):
+        if not path.is_file() or ".git" in path.parts or "__pycache__" in path.parts or path.suffix == ".pyc":
+            continue
+        snapshot.append((path.relative_to(ROOT).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest()))
+    return "windows-worktree-pointer-filesystem-fallback", snapshot
+
+
 class DemoVisualProofTest(unittest.TestCase):
     def test_published_assets_are_sanitized_and_valid(self) -> None:
         asset_dir = ROOT / "docs" / "assets" / "demo"
@@ -33,8 +51,8 @@ class DemoVisualProofTest(unittest.TestCase):
         etree.parse(asset_dir / "visual-proof.svg")
 
     def test_default_run_uses_temporary_output_without_repo_changes(self) -> None:
-        before = subprocess.run(["git", "status", "--short"], cwd=ROOT, text=True, capture_output=True, check=True).stdout
-        result = subprocess.run([sys.executable, str(RUNNER)], cwd=ROOT, text=True, capture_output=True, check=False)
+        before = repository_state()
+        result = subprocess.run([sys.executable, str(RUNNER)], cwd=ROOT, text=True, capture_output=True, check=False, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
         self.assertEqual(0, result.returncode, result.stderr)
         output = Path(result.stdout.strip().split(": ", 1)[1]).parent
         try:
@@ -44,7 +62,7 @@ class DemoVisualProofTest(unittest.TestCase):
             self.assertEqual(["BLOCKED", "PASS", "PASS"], [item["guard"]["status"] for item in summary["scenarios"]])
         finally:
             shutil.rmtree(output)
-        after = subprocess.run(["git", "status", "--short"], cwd=ROOT, text=True, capture_output=True, check=True).stdout
+        after = repository_state()
         self.assertEqual(before, after)
 
     def test_real_test_failure_produces_failed_verification_and_nonzero_runner(self) -> None:

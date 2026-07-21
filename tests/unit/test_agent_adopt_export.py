@@ -9,6 +9,7 @@ import yaml
 
 from governance.adoption import build_plan, export_drafts
 from governance.adoption.exporter import _digest
+from tests.unit.adoption_flow import formal_inputs
 
 
 class AgentAdoptExportTest(unittest.TestCase):
@@ -28,6 +29,7 @@ class AgentAdoptExportTest(unittest.TestCase):
             "schema_version": "1.0",
             "plan_digest": plan["plan_digest"],
             "confirmed_by_user": True,
+            "scope_contract": plan["scope_contract"],
             "preset": {"selected": plan["preset_recommendation"]["recommendation"], "confirmed": True},
             "scope": {"allowed_paths": scope["allowed_paths"], "denied_paths": scope["denied_paths"], "confirmed": True},
             "test_selection": {"candidate_id": candidate["candidate_id"] if candidate else None, "confirmed": True},
@@ -38,11 +40,15 @@ class AgentAdoptExportTest(unittest.TestCase):
         }
 
     def write_inputs(self, base: Path, plan: dict[str, object], confirmation: dict[str, object]) -> tuple[Path, Path]:
-        plan_path = base / "plan.json"
-        confirmation_path = base / "confirmation.yaml"
-        plan_path.write_text(json.dumps(plan), encoding="utf-8")
-        confirmation_path.write_text(yaml.safe_dump(confirmation, sort_keys=False), encoding="utf-8")
+        plan_path = base / "plan.json"; plan_path.write_text(json.dumps(plan), encoding="utf-8")
+        if confirmation.get("plan_digest") != "0" * 64:
+            confirmation["plan_digest"] = plan["plan_digest"]
+        confirmation_path = base / "confirmation.yaml"; confirmation_path.write_text(yaml.safe_dump(confirmation, sort_keys=False), encoding="utf-8")
         return plan_path, confirmation_path
+
+    def formal_plan(self, base: Path, target: Path, stem: str = "export") -> dict[str, object]:
+        plan, _, _, _ = formal_inputs(base, target, stem=stem, confirmed=True)
+        return plan
 
     def test_export_writes_only_external_untrusted_drafts(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -51,7 +57,7 @@ class AgentAdoptExportTest(unittest.TestCase):
             target.mkdir()
             self.target(target)
             before = sorted(path.relative_to(target).as_posix() for path in target.rglob("*"))
-            plan = build_plan(target)
+            plan = self.formal_plan(base, target)
             plan_path, confirmation_path = self.write_inputs(base, plan, self.confirmation(plan))
             output = base / "drafts"
             export_drafts(plan_path, confirmation_path, output, target)
@@ -69,7 +75,7 @@ class AgentAdoptExportTest(unittest.TestCase):
             target = base / "target"
             target.mkdir()
             self.target(target)
-            plan = build_plan(target)
+            plan = self.formal_plan(base, target)
             confirmation = self.confirmation(plan)
             confirmation["plan_digest"] = "0" * 64
             plan_path, confirmation_path = self.write_inputs(base, plan, confirmation)
@@ -87,12 +93,15 @@ class AgentAdoptExportTest(unittest.TestCase):
             target = base / "target"
             target.mkdir()
             self.target(target)
-            plan = build_plan(target)
+            plan = self.formal_plan(base, target)
             plan_path, confirmation_path = self.write_inputs(base, plan, self.confirmation(plan))
             with self.assertRaisesRegex(ValueError, "outside"):
                 export_drafts(plan_path, confirmation_path, target / "drafts", target)
             linked = base / "linked"
-            linked.symlink_to(target, target_is_directory=True)
+            try:
+                linked.symlink_to(target, target_is_directory=True)
+            except OSError:
+                self.skipTest("Symlinks not supported")
             with self.assertRaisesRegex(ValueError, "outside"):
                 export_drafts(plan_path, confirmation_path, linked / "drafts", target)
 
@@ -105,7 +114,7 @@ class AgentAdoptExportTest(unittest.TestCase):
             second.mkdir()
             self.target(first)
             self.target(second)
-            plan = build_plan(first)
+            plan = self.formal_plan(base, first)
             plan_path, confirmation_path = self.write_inputs(base, plan, self.confirmation(plan))
             output = base / "drafts"
             with self.assertRaisesRegex(ValueError, "target identity"):
@@ -119,8 +128,11 @@ class AgentAdoptExportTest(unittest.TestCase):
             target.mkdir()
             self.target(target)
             alias = base / "alias"
-            alias.symlink_to(target, target_is_directory=True)
-            plan = build_plan(target)
+            try:
+                alias.symlink_to(target, target_is_directory=True)
+            except OSError:
+                self.skipTest("Symlinks not supported")
+            plan = self.formal_plan(base, target)
             plan_path, confirmation_path = self.write_inputs(base, plan, self.confirmation(plan))
             export_drafts(plan_path, confirmation_path, base / "drafts", alias)
 
@@ -152,11 +164,11 @@ class AgentAdoptExportTest(unittest.TestCase):
             target = base / "target"
             target.mkdir()
             self.target(target)
-            plan = build_plan(target)
+            plan = self.formal_plan(base, target)
             original = plan["test_candidates"][0]
             duplicate = dict(original, command="different command")
             plan["test_candidates"] = [original, duplicate]
-            plan["plan_digest"] = _digest(plan, "plan_digest")
+            plan["plan_digest"] = _digest(plan)
             confirmation = self.confirmation(plan)
             plan_path, confirmation_path = self.write_inputs(base, plan, confirmation)
             output = base / "drafts"
@@ -171,9 +183,9 @@ class AgentAdoptExportTest(unittest.TestCase):
             target.mkdir()
             self.target(target)
             for variant in ("TEST-PYTHON3", " test-python3", "test-python3 ", "ｅｓｔ-python3"):
-                plan = build_plan(target)
+                plan = self.formal_plan(base, target, stem=f"variant-{len(variant)}-{ord(variant[0])}")
                 plan["test_candidates"][0]["candidate_id"] = variant
-                plan["plan_digest"] = _digest(plan, "plan_digest")
+                plan["plan_digest"] = _digest(plan)
                 plan_path, confirmation_path = self.write_inputs(base, plan, self.confirmation(plan))
                 with self.assertRaises(Exception):
                     export_drafts(plan_path, confirmation_path, base / "drafts", target)
@@ -187,7 +199,7 @@ class AgentAdoptExportTest(unittest.TestCase):
                 target = base / name
                 target.mkdir()
                 self.target(target, kind)
-                plan = build_plan(target)
+                plan = self.formal_plan(inputs, target, stem=name)
                 plan_path, confirmation_path = self.write_inputs(inputs, plan, self.confirmation(plan))
                 export_drafts(plan_path, confirmation_path, base / f"{name}-drafts", target)
                 self.assertFalse((target / ".agent_state").exists())

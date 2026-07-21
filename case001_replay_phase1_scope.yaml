@@ -1,0 +1,32 @@
+task_id: CASE-001-REPLAY-MODULARIZATION-PHASE1
+task_goal: Implement only the approved core-platform modularization boundary and its focused tests and evidence.
+execution_mode: ACTIVE_DEVELOPMENT
+allowed_paths:
+  - docs/modularization/phase1/**
+  - reports/modularization/phase1/**
+  - src/short_cycle_quant/core_platform/**
+  - tests/core_platform/**
+  - tests/test_core_platform*.py
+denied_paths:
+  - .env
+  - backups/**
+  - credentials/**
+  - data/**
+  - deployment/**
+  - src/short_cycle_quant/cache.py
+  - src/short_cycle_quant/cli.py
+  - src/short_cycle_quant/dashboard.py
+  - src/short_cycle_quant/market_environment.py
+  - src/short_cycle_quant/models.py
+  - src/short_cycle_quant/regulatory/**
+  - src/short_cycle_quant/server.py
+  - src/short_cycle_quant/services/**
+  - src/short_cycle_quant/state_machine.py
+  - src/short_cycle_quant/workflow.py
+known_safe_commands:
+  - python -m unittest discover -s tests/core_platform
+  - python -m unittest discover -s tests -p test_core_platform*.py
+network_policy: BLOCKED
+data_write_policy: BLOCKED
+git_policy: PHASE_1
+owner_confirmed_empty_scope: false

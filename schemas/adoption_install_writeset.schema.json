@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_install_writeset.schema.json",
+  "title": "Adoption Install Write-Set",
+  "description": "Canonical bounded target write classification generated before any target write.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "target_identity_digest", "plan_digest", "scope_contract_digest", "classifications", "install_files", "generated_before_target_write", "writeset_digest"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "artifact_type": {"const": "INSTALL_WRITESET"},
+    "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "plan_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "scope_contract_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "classifications": {"type": "object", "additionalProperties": false, "required": ["CREATE", "MODIFY", "SKIP", "FAIL_ON_EXISTING", "MANUAL_ADOPTION_ASSET"], "properties": {"CREATE": {"type": "array", "items": {"type": "string"}}, "MODIFY": {"type": "array", "items": {"type": "string"}}, "SKIP": {"type": "array", "items": {"type": "string"}}, "FAIL_ON_EXISTING": {"type": "array", "items": {"type": "string"}}, "MANUAL_ADOPTION_ASSET": {"type": "array", "items": {"type": "string"}}}},
+    "install_files": {"type": "object", "additionalProperties": false, "required": ["task.yaml", "project_state.yaml"], "properties": {"task.yaml": {"$ref": "#/$defs/install_file"}, "project_state.yaml": {"$ref": "#/$defs/install_file"}}},
+    "generated_before_target_write": {"const": true},
+    "writeset_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {"install_file": {"type": "object", "additionalProperties": false, "required": ["source_artifact", "expected_sha256"], "properties": {"source_artifact": {"type": "string"}, "expected_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}}
+}

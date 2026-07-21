@@ -1,4 +1,34 @@
 {
+  "adoption_approval_candidate.schema.json": {
+    "required": ["schema_version", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "runtime_artifact_manifest_digest", "provenance_receipt_digest", "scope_contract", "scope_contract_digest", "writeset_digest", "pre_install_hashes_digest", "rollback_manifest_digest", "compiler", "runtime_artifacts", "approved_by_user", "install_approved", "activate_approved", "approved_action", "approved_files", "conflict_policy", "rollback_on_failure", "blocked_decisions"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_install_writeset.schema.json": {
+    "required": ["schema_version", "artifact_type", "target_identity_digest", "plan_digest", "scope_contract_digest", "classifications", "install_files", "generated_before_target_write", "writeset_digest"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_pre_install_hashes.schema.json": {
+    "required": ["schema_version", "artifact_type", "target_identity_digest", "writeset_digest", "entries", "generated_before_target_write", "pre_install_hashes_digest"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_provenance_receipt.schema.json": {
+    "required": ["schema_version", "binding_type", "generator_id", "generator_version", "generator_source_digest", "generation_path", "generation_command_contract_digest", "formal_scope_input_digest", "formal_scope_normalized_text_digest", "target_identity", "target_branch", "target_head", "framework_commit", "plan_payload_digest", "generated_at", "provenance_receipt_digest"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_rollback_manifest.schema.json": {
+    "required": ["schema_version", "artifact_type", "target_identity_digest", "writeset_digest", "automatic_rollback_available", "actions", "generated_before_target_write", "rollback_manifest_digest"],
+    "enums": {},
+    "types": {}
+  },
+  "adoption_scope_input.schema.json": {
+    "required": ["task_id", "task_goal", "execution_mode", "allowed_paths", "denied_paths", "known_safe_commands", "network_policy", "data_write_policy", "git_policy", "owner_confirmed_empty_scope"],
+    "enums": {},
+    "types": {}
+  },
   "adoption_lifecycle_evidence.schema.json": {
     "required": ["schema_version", "evidence_type", "status", "target_identity_digest", "previous_state_digest", "upstream_evidence_digests", "payload"],
     "enums": {},
@@ -19,6 +49,7 @@
       "schema_version",
       "plan_digest",
       "confirmed_by_user",
+      "scope_contract",
       "preset",
       "scope",
       "test_selection",
@@ -29,17 +60,17 @@
     "types": {}
   },
   "adoption_final_approval.schema.json": {
-    "required": ["schema_version", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "runtime_artifact_manifest_digest", "compiler", "runtime_artifacts", "approved_by_user", "approved_action", "approved_files", "conflict_policy", "rollback_on_failure", "blocked_decisions"],
+    "required": ["schema_version", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "runtime_artifact_manifest_digest", "provenance_receipt_digest", "scope_contract", "scope_contract_digest", "writeset_digest", "pre_install_hashes_digest", "rollback_manifest_digest", "compiler", "runtime_artifacts", "approved_by_user", "install_approved", "activate_approved", "approved_action", "approved_files", "conflict_policy", "rollback_on_failure", "blocked_decisions"],
     "enums": {},
     "types": {}
   },
   "adoption_installation_receipt.schema.json": {
-    "required": ["schema_version", "status", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "final_approval_digest", "runtime_artifact_manifest_digest", "compiler", "installed", "activated", "tests_executed", "verification_completed", "closure_completed", "created_files", "created_directories", "file_hashes", "blocked_decisions", "automatic_rollback_available", "rollback_assessment_available", "rollback_mode"],
+    "required": ["schema_version", "status", "target_identity_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "final_approval_digest", "runtime_artifact_manifest_digest", "provenance_receipt_digest", "scope_contract", "scope_contract_digest", "writeset_digest", "pre_install_hashes_digest", "rollback_manifest_digest", "compiler", "installed", "activated", "tests_executed", "verification_completed", "closure_completed", "created_files", "created_directories", "file_hashes", "blocked_decisions", "automatic_rollback_available", "rollback_assessment_available", "rollback_mode"],
     "enums": {},
     "types": {}
   },
   "runtime_artifact_manifest.schema.json": {
-    "required": ["schema_version", "compiler_id", "compiler_version", "compiler_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "source_draft_digests", "runtime_artifacts", "manifest_digest"],
+    "required": ["schema_version", "compiler_id", "compiler_version", "compiler_digest", "plan_digest", "confirmation_digest", "export_manifest_digest", "source_draft_digests", "scope_contract_digest", "provenance_receipt_digest", "sidecar_digests", "runtime_artifacts", "manifest_digest"],
     "enums": {},
     "types": {}
   },
@@ -60,6 +91,7 @@
       "project_root",
       "read_only",
       "target_identity",
+      "scope_contract",
       "plan_digest",
       "field_semantics",
       "adapter",
@@ -67,6 +99,7 @@
       "preset_recommendation",
       "test_candidates",
       "asset_manifest",
+      "install_classifications",
       "conflicts",
       "task_draft",
       "scope_candidates",
@@ -75,7 +108,8 @@
       "blocked_decisions",
       "next_commands",
       "rollback_checklist",
-      "warnings"
+      "warnings",
+      "provenance_receipt"
     ],
     "enums": {},
     "types": {}

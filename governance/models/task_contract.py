@@ -19,6 +19,7 @@ class TaskContract:
     verification: Mapping[str, Any]
     report: Mapping[str, Any]
     governance: Mapping[str, Any] = field(default_factory=dict)
+    scope_contract: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "TaskContract":
@@ -31,4 +32,6 @@ class TaskContract:
         result = {"schema_version": self.schema_version, "task_id": self.task_id, "project_mode": self.project_mode, "task_level": self.task_level, "status": self.status, "objective": list(self.objective), "read_scope": list(self.read_scope), "write_scope": dict(self.write_scope), "autonomy": dict(self.autonomy), "stop_conditions": list(self.stop_conditions), "verification": dict(self.verification), "report": dict(self.report)}
         if self.governance:
             result["governance"] = dict(self.governance)
+        if self.scope_contract:
+            result["scope_contract"] = dict(self.scope_contract)
         return result

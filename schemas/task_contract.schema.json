@@ -206,6 +206,7 @@
           "const": "GOV-ENVELOPE-001"
         }
       }
-    }
+    },
+    "scope_contract": {"type": "object"}
   }
 }

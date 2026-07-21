@@ -66,7 +66,10 @@ def setup_synthetic_repo(root: Path, task_id: str) -> None:
 
 
 def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, text=True, encoding="utf-8", capture_output=True, check=False)
+    import os
+    env = dict(os.environ)
+    env["PYTHONIOENCODING"] = "utf-8"
+    return subprocess.run(command, cwd=cwd, text=True, encoding="utf-8", capture_output=True, check=False, env=env)
 
 
 def sanitize(value: str, synthetic_root: Path) -> str:

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_rollback_manifest.schema.json",
+  "title": "Adoption Rollback Manifest",
+  "description": "Manual-only rollback evidence generated before target writes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "target_identity_digest", "writeset_digest", "automatic_rollback_available", "actions", "generated_before_target_write", "rollback_manifest_digest"],
+  "properties": {
+    "schema_version": {"const": "1.0"}, "artifact_type": {"const": "ROLLBACK_MANIFEST"},
+    "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "writeset_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "automatic_rollback_available": {"const": false},
+    "actions": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["relative_path", "expected_installed_sha256", "action"], "properties": {"relative_path": {"enum": ["task.yaml", "project_state.yaml"]}, "expected_installed_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "action": {"const": "MANUAL_DELETE_IF_UNCHANGED"}}}},
+    "generated_before_target_write": {"const": true}, "rollback_manifest_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

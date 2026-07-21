@@ -10,12 +10,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from governance.adoption import assess_rollback, build_plan, compile_runtime_bundle, export_drafts, install_approved, rollback_install, render_json, render_markdown  # noqa: E402
+from governance.adoption.c0_scanner import scan_directory_for_c0
+from governance.adoption.approval_candidate import approve_install_candidate, build_approval_candidate, write_approval_candidate  # noqa: E402
+from governance.adoption.exporter import confirmation_candidate  # noqa: E402
+from governance.adoption.io import write_bytes_exclusive, write_json_exclusive, write_text_exclusive, write_yaml_exclusive  # noqa: E402
+from governance.adoption.provenance import PUBLIC_GENERATION_PATH  # noqa: E402
+from governance.schema_loader import load_mapping  # noqa: E402
 
 
 COMMANDS = {
     "dry-run": "Analyze an existing project without writing to the target.",
+    "confirmation-candidate": "Create an external review candidate without inventing owner approval.",
     "export-drafts": "Export adoption drafts and confirmation artifacts outside the target.",
     "compile-runtime-artifacts": "Compile approved drafts into external Runtime preview artifacts.",
+    "approval-candidate": "Create an unapproved exact-byte installation candidate for Owner review.",
+    "approve-install-candidate": "Record an explicit Owner install decision for an unchanged candidate.",
     "install-approved": "Install exact approved Runtime artifact bytes without activation.",
     "assess-rollback": "Produce a read-only manual recovery assessment.",
     "rollback-install": "Reject automatic rollback and explain the manual-only boundary.",
@@ -26,6 +35,9 @@ def _add_dry_run_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--project-root", type=Path, default=argparse.SUPPRESS, help="Existing local project to inspect (required)")
     parser.add_argument("--format", choices=("markdown", "json"), default=argparse.SUPPRESS)
     parser.add_argument("--output", type=Path, default=argparse.SUPPRESS, help="Explicit output path outside --project-root; stdout by default")
+    parser.add_argument("--scope-file", type=Path, default=argparse.SUPPRESS, help="Explicit scope input configuration (JSON/YAML) for active development.")
+    parser.add_argument("--scope-copy-output", type=Path, default=argparse.SUPPRESS, help="Optional external byte-identical copy of the formal scope input.")
+    parser.add_argument("--provenance-output", type=Path, default=argparse.SUPPRESS, help="Optional external standalone provenance receipt.")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,6 +52,12 @@ def build_parser() -> argparse.ArgumentParser:
     dry_run = subcommands.add_parser("dry-run", help=COMMANDS["dry-run"], description=COMMANDS["dry-run"])
     _add_dry_run_arguments(dry_run)
 
+    candidate = subcommands.add_parser("confirmation-candidate", help=COMMANDS["confirmation-candidate"], description=COMMANDS["confirmation-candidate"])
+    candidate.add_argument("--plan", type=Path, required=True)
+    candidate.add_argument("--output", type=Path, required=True)
+    candidate.add_argument("--target-project-root", type=Path, required=True)
+    candidate.add_argument("--confirm-owner", action="store_true", help="Explicitly record caller-supplied Owner confirmation; never used for Preview generation.")
+
     export = subcommands.add_parser("export-drafts", help=COMMANDS["export-drafts"], description=COMMANDS["export-drafts"])
     export.add_argument("--plan", type=Path, required=True)
     export.add_argument("--confirmations", type=Path, required=True)
@@ -52,6 +70,20 @@ def build_parser() -> argparse.ArgumentParser:
     compile_artifacts.add_argument("--draft-bundle", type=Path, required=True)
     compile_artifacts.add_argument("--output-dir", type=Path, required=True)
     compile_artifacts.add_argument("--target-project-root", type=Path, required=True, help="Used only to reject target-project output paths")
+
+    approval_candidate = subcommands.add_parser("approval-candidate", help=COMMANDS["approval-candidate"], description=COMMANDS["approval-candidate"])
+    approval_candidate.add_argument("--plan", type=Path, required=True)
+    approval_candidate.add_argument("--confirmations", type=Path, required=True)
+    approval_candidate.add_argument("--draft-bundle", type=Path, required=True)
+    approval_candidate.add_argument("--runtime-artifact-bundle", type=Path, required=True)
+    approval_candidate.add_argument("--target-project-root", type=Path, required=True)
+    approval_candidate.add_argument("--output", type=Path, required=True)
+
+    approve_candidate = subcommands.add_parser("approve-install-candidate", help=COMMANDS["approve-install-candidate"], description=COMMANDS["approve-install-candidate"])
+    approve_candidate.add_argument("--candidate", type=Path, required=True)
+    approve_candidate.add_argument("--output", type=Path, required=True)
+    approve_candidate.add_argument("--target-project-root", type=Path, required=True)
+    approve_candidate.add_argument("--owner-approved", action="store_true", required=True)
 
     install = subcommands.add_parser("install-approved", help=COMMANDS["install-approved"], description="Install exact approved Runtime artifact bytes. It does not activate state or run lifecycle steps.")
     install.add_argument("--target-project-root", type=Path, required=True)
@@ -89,24 +121,74 @@ def _dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     root = args.project_root.expanduser().resolve()
     if not root.is_dir():
         raise ValueError(f"--project-root must be an existing directory: {args.project_root}")
-    plan = build_plan(root)
+    scope_file = getattr(args, "scope_file", None)
+    if scope_file:
+        scope_file = scope_file.expanduser().resolve()
+        if not scope_file.is_file():
+            raise ValueError(f"--scope-file must be an existing file: {scope_file}")
+    plan = build_plan(root, scope_file=scope_file, generation_path=PUBLIC_GENERATION_PATH)
     rendered = render_markdown(plan) if getattr(args, "format", "markdown") == "markdown" else render_json(plan)
     if getattr(args, "output", None):
         destination = _output_path(root, args.output)
-        if destination.exists():
-            raise ValueError("--output already exists; refusing to overwrite it")
         destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_text(rendered, encoding="utf-8")
+        try:
+            write_text_exclusive(destination, rendered)
+
+            # Scan the created file for C0
+            from governance.adoption.c0_scanner import scan_file_for_c0
+            errors = scan_file_for_c0(destination)
+            if errors:
+                for err in errors:
+                    print(f"HANDOFF_ERROR: {err}", file=sys.stderr)
+                raise ValueError("HANDOFF_READY_FAILED_C0_SCAN")
+        except FileExistsError:
+            raise ValueError("--output already exists; refusing to overwrite it")
     else:
         sys.stdout.write(rendered)
+    if getattr(args, "scope_copy_output", None):
+        if scope_file is None:
+            raise ValueError("--scope-copy-output requires --scope-file")
+        write_bytes_exclusive(_output_path(root, args.scope_copy_output), scope_file.read_bytes())
+    if getattr(args, "provenance_output", None):
+        write_json_exclusive(_output_path(root, args.provenance_output), plan["provenance_receipt"])
+
+
+def _confirmation_candidate(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    target = args.target_project_root.expanduser().resolve(strict=True)
+    plan = load_mapping(args.plan)
+    value = confirmation_candidate(plan, confirmed_by_user=args.confirm_owner)
+    write_yaml_exclusive(_output_path(target, args.output), value)
 
 
 def _export_drafts(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
     export_drafts(args.plan, args.confirmations, args.output_dir, args.target_project_root)
-
+    errors = scan_directory_for_c0(args.output_dir)
+    if errors:
+        for err in errors:
+            print(f"HANDOFF_ERROR: {err}", file=sys.stderr)
+        raise ValueError("HANDOFF_READY_FAILED_C0_SCAN")
 
 def _compile_runtime_artifacts(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
     compile_runtime_bundle(args.plan, args.confirmations, args.draft_bundle, args.output_dir, args.target_project_root)
+
+
+def _approval_candidate(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    target = args.target_project_root.expanduser().resolve(strict=True)
+    value = build_approval_candidate(
+        plan_path=args.plan,
+        confirmation_path=args.confirmations,
+        draft_bundle=args.draft_bundle,
+        runtime_bundle=args.runtime_artifact_bundle,
+        target_root=target,
+    )
+    write_approval_candidate(_output_path(target, args.output), value)
+
+
+def _approve_install_candidate(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    target = args.target_project_root.expanduser().resolve(strict=True)
+    if not args.owner_approved:
+        raise ValueError("explicit --owner-approved is required")
+    write_yaml_exclusive(_output_path(target, args.output), approve_install_candidate(args.candidate))
 
 
 def _install_approved(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
@@ -123,8 +205,11 @@ def _rollback_install(args: argparse.Namespace, _: argparse.ArgumentParser) -> N
 
 HANDLERS = {
     "dry-run": _dry_run,
+    "confirmation-candidate": _confirmation_candidate,
     "export-drafts": _export_drafts,
     "compile-runtime-artifacts": _compile_runtime_artifacts,
+    "approval-candidate": _approval_candidate,
+    "approve-install-candidate": _approve_install_candidate,
     "install-approved": _install_approved,
     "assess-rollback": _assess_rollback,
     "rollback-install": _rollback_install,

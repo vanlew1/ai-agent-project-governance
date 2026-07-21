@@ -1,7 +1,11 @@
 """Provenance-bound adapter over the existing formal lifecycle components."""
 from __future__ import annotations
 
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+    import msvcrt
 import hashlib
 import json
 from pathlib import Path
@@ -9,11 +13,11 @@ from typing import Any, Mapping
 
 from governance.adoption.evidence_registry import upstream_digests, validate_evidence_file
 from governance.adoption.installer import digest
+from governance.adoption.io import write_text_atomic
 from governance.adoption.lifecycle_context import snapshot_workspace
 from governance.guards.scope_guard import check as check_scope
 from governance.models.project_state import ProjectState
 from governance.schema_loader import load_mapping, validate_mapping
-from governance.state.atomic_writer import write
 from governance.verification.command_registry import get as registry_command
 from governance.verification.command_runner import run as run_command
 from governance.verification.closure_evaluator import close
@@ -35,7 +39,10 @@ def transition_project_state(
     lock_path = path.with_name(f".{path.name}.lifecycle.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a+", encoding="utf-8") as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        if fcntl:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        else:
+            msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)
         current_bytes = path.read_bytes()
         current_digest = hashlib.sha256(current_bytes).hexdigest()
         if current_digest != expected_current_state_digest:
@@ -62,7 +69,7 @@ def transition_project_state(
         if requested_next_stage == "CLOSED":
             updated["closure_completed"] = True
         validate_mapping(updated, "project_state.schema.json"); ProjectState.from_mapping(updated)
-        write(path, json.dumps(updated, ensure_ascii=False, indent=2) + "\n")
+        write_text_atomic(path, json.dumps(updated, ensure_ascii=False, indent=2) + "\n")
         return updated
 
 

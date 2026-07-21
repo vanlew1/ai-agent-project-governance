@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/adoption_pre_install_hashes.schema.json",
+  "title": "Adoption Pre-Install Hashes",
+  "description": "Exact pre-write target state for the bounded installation paths.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "target_identity_digest", "writeset_digest", "entries", "generated_before_target_write", "pre_install_hashes_digest"],
+  "properties": {
+    "schema_version": {"const": "1.0"}, "artifact_type": {"const": "PRE_INSTALL_HASHES"},
+    "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "writeset_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "entries": {"type": "object", "additionalProperties": false, "required": ["task.yaml", "project_state.yaml"], "properties": {"task.yaml": {"$ref": "#/$defs/entry"}, "project_state.yaml": {"$ref": "#/$defs/entry"}}},
+    "generated_before_target_write": {"const": true}, "pre_install_hashes_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "$defs": {"entry": {"type": "object", "additionalProperties": false, "required": ["exists", "sha256"], "properties": {"exists": {"type": "boolean"}, "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}}}}
+}

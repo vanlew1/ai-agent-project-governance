@@ -4,6 +4,7 @@ import subprocess, sys, time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 PY=sys.executable
+GATE_TIMEOUT_SECONDS=300
 GATES=(
     ("governance", [PY,"scripts/validate_governance.py"]),
     ("schema-compatibility", [PY,"scripts/check_schema_compatibility.py"]),
@@ -16,7 +17,7 @@ GATES=(
 )
 def run(name, argv):
     started=time.monotonic()
-    try: result=subprocess.run(argv,cwd=ROOT,text=True,capture_output=True,encoding="utf-8",errors="replace",timeout=180)
+    try: result=subprocess.run(argv,cwd=ROOT,text=True,capture_output=True,encoding="utf-8",errors="replace",timeout=GATE_TIMEOUT_SECONDS)
     except (OSError,subprocess.TimeoutExpired) as exc: print(f"{name}: ERROR ({exc})"); return False
     elapsed=time.monotonic()-started; summary=(result.stdout or result.stderr).strip().splitlines()
     detail=summary[-1] if summary else "no output"

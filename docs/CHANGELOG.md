@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### CASE-001 minimum unblock remediation (1.2.0 candidate)
+
+- Added formal `--scope-file` flow with one canonical scope contract enforced at planning, confirmation, export, Runtime compilation, approval, and installation boundaries.
+- Added truthful Toolchain Provenance Binding for public CLI generation. It binds repository `VERSION`, generator sources, command contract, formal-scope bytes, target branch/HEAD, framework commit, plan payload, and receipt digest; it is not a keyed anti-forgery signature.
+- Added pre-write `INSTALL_WRITESET.json`, `PRE_INSTALL_HASHES.json`, and `ROLLBACK_MANIFEST.json` artifacts shared by compiler, approval, installer, receipt, and manual rollback assessment.
+- Added byte-stable UTF-8/LF exclusive and atomic writers for formal adoption artifacts, plus raw and normalized-text identities for reviewed human text.
+- Added public unapproved confirmation/approval candidates; Preview generation leaves Owner, install, and activation approval false.
+- Removed the ad hoc CASE-001 regeneration script that bypassed public CLI authority boundaries.
+
 ### Added
 
 - Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.

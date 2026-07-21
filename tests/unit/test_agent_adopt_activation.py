@@ -9,8 +9,6 @@ from unittest.mock import patch
 
 import yaml
 
-from governance.adoption import build_plan, compile_runtime_bundle, export_drafts, install_approved
-from governance.adoption.exporter import _digest
 from governance.adoption.activation import activate_approved
 from governance.adoption.lifecycle_context import build_lifecycle_context
 from governance.adoption.evidence_registry import upstream_digests
@@ -20,6 +18,7 @@ from governance.adoption.installer import digest
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME, digest_bytes
 from governance.models.project_state import ProjectState
 from governance.state import store
+from tests.unit.adoption_flow import installed_inputs
 
 
 R1_ROOT = Path("/tmp/agc-adoption-04f-a-r1")
@@ -27,15 +26,6 @@ R1_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 class ApprovedActivationTest(unittest.TestCase):
-    def confirmation(self, plan: dict) -> dict:
-        candidate = plan["test_candidates"][0] if plan["test_candidates"] else None
-        scope = plan["scope_candidates"][0]
-        return {"schema_version":"1.0","plan_digest":plan["plan_digest"],"confirmed_by_user":True,"preset":{"selected":plan["preset_recommendation"]["recommendation"],"confirmed":True},"scope":{"allowed_paths":scope["allowed_paths"],"denied_paths":scope["denied_paths"],"confirmed":True},"test_selection":{"candidate_id":candidate["candidate_id"] if candidate else None,"confirmed":True},"autonomy":{"level":"constrained","confirmed":True},"blocked_decisions":{key:"BLOCKED" for key in ("production_data","external_api","git_write","release","state_activation","security_bypass","business_semantic_change")}}
-
-    def install_approval(self, target: Path, drafts: Path, runtime: Path, plan: dict) -> dict:
-        exported = json.loads((drafts / "EXPORT_MANIFEST.json").read_text(encoding="utf-8")); manifest = json.loads((runtime / MANIFEST_FILENAME).read_text(encoding="utf-8")); items = {item["artifact_type"]: item for item in manifest["runtime_artifacts"]}
-        return {"schema_version":"1.0","target_identity_digest":plan["target_identity"]["identity_digest"],"plan_digest":exported["plan_digest"],"confirmation_digest":exported["confirmation_digest"],"export_manifest_digest":digest(exported),"runtime_artifact_manifest_digest":manifest["manifest_digest"],"compiler":{"id":manifest["compiler_id"],"version":manifest["compiler_version"],"digest":manifest["compiler_digest"]},"runtime_artifacts":{"task_contract":{"sha256":items["TASK_CONTRACT"]["sha256"]},"project_state":{"sha256":items["PROJECT_STATE"]["sha256"]}},"approved_by_user":True,"approved_action":"INSTALL_NEW_FILES_ONLY","approved_files":["task.yaml","project_state.yaml"],"conflict_policy":"FAIL_ON_EXISTING","rollback_on_failure":True,"blocked_decisions":{key:"BLOCKED" for key in ("state_activation","test_execution","git_write","network_access","production_data","external_api","release","security_bypass","business_semantic_change")}}
-
     def setup(self, base: Path, allowed_scope: list[str] | None = None, *, kind: str = "python", target_name: str = "target"):
         target = base / target_name; target.mkdir(); (target / "AGENTS.md").write_text("synthetic only\n", encoding="utf-8")
         if kind == "python":
@@ -47,16 +37,14 @@ class ApprovedActivationTest(unittest.TestCase):
             (target / "package.json").write_text('{"name":"synthetic","scripts":{"test":"node -e \\\"process.exit(0)\\\"}}', encoding="utf-8")
         elif kind != "generic":
             raise ValueError(f"unsupported synthetic kind: {kind}")
-        plan = build_plan(target)
-        if allowed_scope is not None:
-            plan["scope_candidates"][0]["allowed_paths"] = allowed_scope
-            plan["plan_digest"] = _digest(plan, "plan_digest")
-        plan_path, confirmation_path = base / "plan.json", base / "confirmation.yaml"; plan_path.write_text(json.dumps(plan), encoding="utf-8"); confirmation_path.write_text(yaml.safe_dump(self.confirmation(plan)), encoding="utf-8")
-        drafts, runtime = base / "drafts", base / "runtime"; export_drafts(plan_path, confirmation_path, drafts, target); compile_runtime_bundle(plan_path, confirmation_path, drafts, runtime, target)
-        final = base / "final.yaml"; final.write_text(yaml.safe_dump(self.install_approval(target, drafts, runtime, plan)), encoding="utf-8")
-        install = base / "install.json"; install_approved(target, drafts, runtime, final, install, plan_path, confirmation_path)
+        if allowed_scope is None:
+            allowed_scope = ["src/core/**"]
+        plan, plan_path, confirmation_path, drafts, runtime, final, install = installed_inputs(
+            base, target, stem="activation", allowed_paths=allowed_scope,
+        )
         manifest = json.loads((runtime / MANIFEST_FILENAME).read_text(encoding="utf-8")); receipt = json.loads(install.read_text(encoding="utf-8"))
-        approval = {"schema_version":"1.0","approved_by_user":True,"approved_action":"ACTIVATE_INSTALLED_RUNTIME","target_identity_digest":plan["target_identity"]["identity_digest"],"runtime_artifact_manifest_digest":manifest["manifest_digest"],"final_install_approval_digest":digest(self.install_approval(target, drafts, runtime, plan)),"installation_receipt_digest":digest(receipt),"compiler":{"id":manifest["compiler_id"],"version":manifest["compiler_version"],"digest":manifest["compiler_digest"]},"runtime_artifacts":{"task_contract_sha256":digest_bytes((target / "task.yaml").read_bytes()),"project_state_sha256":digest_bytes((target / "project_state.yaml").read_bytes())},"expected_current_state":{"status":"INSTALLED_NOT_ACTIVATED","project_state_sha256":digest_bytes((target / "project_state.yaml").read_bytes())},"requested_transition":{"from":"INSTALLED_NOT_ACTIVATED","to":"ACTIVATED_NOT_PREFLIGHTED"},"blocked_decisions":{key:"BLOCKED" for key in ("production_data","external_api","network_access","git_write","release","security_bypass","business_semantic_change")}}
+        final_mapping = yaml.safe_load(final.read_text(encoding="utf-8"))
+        approval = {"schema_version":"1.0","approved_by_user":True,"approved_action":"ACTIVATE_INSTALLED_RUNTIME","target_identity_digest":plan["target_identity"]["identity_digest"],"runtime_artifact_manifest_digest":manifest["manifest_digest"],"final_install_approval_digest":digest(final_mapping),"installation_receipt_digest":digest(receipt),"compiler":{"id":manifest["compiler_id"],"version":manifest["compiler_version"],"digest":manifest["compiler_digest"]},"runtime_artifacts":{"task_contract_sha256":digest_bytes((target / "task.yaml").read_bytes()),"project_state_sha256":digest_bytes((target / "project_state.yaml").read_bytes())},"expected_current_state":{"status":"INSTALLED_NOT_ACTIVATED","project_state_sha256":digest_bytes((target / "project_state.yaml").read_bytes())},"requested_transition":{"from":"INSTALLED_NOT_ACTIVATED","to":"ACTIVATED_NOT_PREFLIGHTED"},"blocked_decisions":{key:"BLOCKED" for key in ("production_data","external_api","network_access","git_write","release","security_bypass","business_semantic_change")}}
         activation = base / "activation.yaml"; activation.write_text(yaml.safe_dump(approval), encoding="utf-8")
         return target, runtime, final, install, activation
 
@@ -104,14 +92,14 @@ class ApprovedActivationTest(unittest.TestCase):
             context = build_lifecycle_context(
                 target, target / "task.yaml", target / "project_state.yaml", install, activation_receipt,
                 runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final,
-                activation_approval=approval, confirmation=base / "confirmation.yaml", plan=base / "plan.json",
+                activation_approval=approval, confirmation=base / "activation-confirmation.yaml", plan=base / "activation-plan.json",
             )
             self.assertEqual((("python-project-tests", context.confirmed_test_candidates[0][1]),), context.confirmed_test_candidates)
             self.assertTrue(context.runtime_artifact_manifest_digest)
-            changed = yaml.safe_load((base / "confirmation.yaml").read_text(encoding="utf-8")); changed["scope"]["allowed_paths"] = ["other/**"]
-            (base / "confirmation.yaml").write_text(yaml.safe_dump(changed), encoding="utf-8")
+            changed = yaml.safe_load((base / "activation-confirmation.yaml").read_text(encoding="utf-8")); changed["scope"]["allowed_paths"] = ["other/**"]
+            (base / "activation-confirmation.yaml").write_text(yaml.safe_dump(changed), encoding="utf-8")
             with self.assertRaises(ValueError):
-                build_lifecycle_context(target, target / "task.yaml", target / "project_state.yaml", install, activation_receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "confirmation.yaml", plan=base / "plan.json")
+                build_lifecycle_context(target, target / "task.yaml", target / "project_state.yaml", install, activation_receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "activation-confirmation.yaml", plan=base / "activation-plan.json")
 
     def test_end_to_end_python_adoption_closes(self) -> None:
         with tempfile.TemporaryDirectory(dir=R1_ROOT) as temp:
@@ -121,7 +109,7 @@ class ApprovedActivationTest(unittest.TestCase):
             state_path = target / "project_state.yaml"
 
             def context():
-                return build_lifecycle_context(target, target / "task.yaml", state_path, install, receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "confirmation.yaml", plan=base / "plan.json")
+                return build_lifecycle_context(target, target / "task.yaml", state_path, install, receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "activation-confirmation.yaml", plan=base / "activation-plan.json")
 
             def evidence(name: str, evidence_type: str, status: str) -> Path:
                 state = yaml.safe_load(state_path.read_text(encoding="utf-8"))
@@ -162,7 +150,7 @@ class ApprovedActivationTest(unittest.TestCase):
                     activate_approved(target, target / "task.yaml", target / "project_state.yaml", runtime / MANIFEST_FILENAME, final, install, approval, receipt)
                     state_path = target / "project_state.yaml"
                     def context():
-                        return build_lifecycle_context(target, target / "task.yaml", state_path, install, receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "confirmation.yaml", plan=base / "plan.json")
+                        return build_lifecycle_context(target, target / "task.yaml", state_path, install, receipt, runtime_artifact_manifest=runtime / MANIFEST_FILENAME, final_install_approval=final, activation_approval=approval, confirmation=base / "activation-confirmation.yaml", plan=base / "activation-plan.json")
                     def evidence(name: str, evidence_type: str, status: str) -> Path:
                         state = yaml.safe_load(state_path.read_text(encoding="utf-8")); path = base / name
                         path.write_text(json.dumps({"schema_version":"1.0", "evidence_type":evidence_type, "status":status, "target_identity_digest":context().target_identity_digest, "previous_state_digest":hashlib.sha256(state_path.read_bytes()).hexdigest(), "upstream_evidence_digests":upstream_digests(state), "payload":{}}, sort_keys=True), encoding="utf-8")
