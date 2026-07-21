@@ -126,15 +126,37 @@ class GitHeadBlobProvenanceTest(unittest.TestCase):
         lf = Path(self.temp_dir.name) / "lf"
         crlf = Path(self.temp_dir.name) / "crlf"
         subprocess.run(["git", "clone", "--bare", str(source), str(bare)], check=True, capture_output=True)
-        subprocess.run(["git", "clone", str(bare), str(lf)], check=True, capture_output=True)
-        subprocess.run(["git", "clone", str(bare), str(crlf)], check=True, capture_output=True)
-        self.git("config", "core.autocrlf", "false", cwd=lf)
-        self.git("config", "core.autocrlf", "true", cwd=crlf)
-        self.git("reset", "--hard", "HEAD", cwd=lf)
-        self.git("reset", "--hard", "HEAD", cwd=crlf)
+        subprocess.run(["git", "-c", "core.autocrlf=false", "clone", str(bare), str(lf)], check=True, capture_output=True)
+        subprocess.run(["git", "-c", "core.autocrlf=true", "clone", str(bare), str(crlf)], check=True, capture_output=True)
+        self.git("config", "--local", "core.autocrlf", "false", cwd=lf)
+        self.git("config", "--local", "core.autocrlf", "true", cwd=crlf)
 
-        self.assertNotIn(b"\r\n", (lf / "VERSION").read_bytes())
-        self.assertIn(b"\r\n", (crlf / "VERSION").read_bytes())
+        self.assertEqual(self.git("rev-parse", "HEAD", cwd=lf).stdout, self.git("rev-parse", "HEAD", cwd=crlf).stdout)
+        self.assertEqual(
+            self.git("rev-parse", "HEAD^{tree}", cwd=lf).stdout,
+            self.git("rev-parse", "HEAD^{tree}", cwd=crlf).stdout,
+        )
+        for relative_path in provenance.GENERATOR_INPUTS:
+            self.assertEqual(
+                self.git("rev-parse", f"HEAD:{relative_path}", cwd=lf).stdout,
+                self.git("rev-parse", f"HEAD:{relative_path}", cwd=crlf).stdout,
+            )
+        self.assertEqual(b"", self.git("status", "--porcelain=v1", cwd=lf).stdout)
+        self.assertEqual(b"", self.git("status", "--porcelain=v1", cwd=crlf).stdout)
+
+        lf_eol = self.git("ls-files", "--eol", "--", *provenance.GENERATOR_INPUTS, cwd=lf).stdout.splitlines()
+        crlf_eol = self.git("ls-files", "--eol", "--", *provenance.GENERATOR_INPUTS, cwd=crlf).stdout.splitlines()
+        self.assertEqual(len(provenance.GENERATOR_INPUTS), len(lf_eol))
+        self.assertEqual(len(provenance.GENERATOR_INPUTS), len(crlf_eol))
+        self.assertTrue(all(b"w/lf" in row for row in lf_eol))
+        self.assertTrue(all(b"w/crlf" in row for row in crlf_eol))
+
+        lf_version = (lf / "VERSION").read_bytes()
+        crlf_version = (crlf / "VERSION").read_bytes()
+        self.assertNotEqual(lf_version, crlf_version)
+        self.assertIn(b"\n", lf_version)
+        self.assertNotIn(b"\r\n", lf_version)
+        self.assertIn(b"\r\n", crlf_version)
         self.assertEqual(provenance.generator_source_digest(root=lf), provenance.generator_source_digest(root=crlf))
 
     def test_dirty_or_staged_generator_source_fails_closed_even_with_cached_digest(self) -> None:
