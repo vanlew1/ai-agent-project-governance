@@ -1,6 +1,8 @@
-# Agent Governance for Coding Agents
+# Coding Agent Governance
 
-> A deterministic scope, evidence, and closure layer for AI coding-agent workflows.
+> A governance layer for AI coding agents that keeps changes scoped, evidence-bound, reviewable, and explicitly closed.
+
+Repository-slug migration from `ai-agent-project-governance` is pending.
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)

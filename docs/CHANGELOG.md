@@ -29,6 +29,9 @@
 
 - 鏇存柊 `agent_rules/00_rule_router.md` 鍜?`AGENTS.md`锛屽皢楂樻垚鏈€佽仈缃戙€佹寮忓啓鍏ャ€佷笉鍙€嗘搷浣滅瓑浠诲姟鐨勪汉宸ュ墠缃棬鍓嶇Щ鍒版墿灞曡鍙栧拰鏂藉伐涔嬪墠銆?
 
+- Prepared the public product presentation as Coding Agent Governance; the current repository slug remains `ai-agent-project-governance` until an authenticated GitHub rename can complete.
+- Added controlled distribution copy, a target-review matrix, and a tracking baseline for Coding Agent Governance. No runtime, schema, CLI, state-machine, repository-slug, or third-party submission change was made.
+
 ### Fixed
 
 - Changed the canonical release tests timeout from a fixed 300-second limit to a fail-closed, auditable 600-second default hang guard configurable from 60 through 3600 seconds.

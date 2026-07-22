@@ -1,0 +1,45 @@
+version: "1.0"
+project_name: "Coding Agent Governance"
+
+tasks:
+  - task_id: "AGC-OSS-GROWTH-04"
+    title: "Controlled distribution assets and tracking"
+    status: "completed"
+    level: "C"
+    owner: "repository owner"
+    scope:
+      include:
+        - "README.md"
+        - "README.zh-CN.md"
+        - "docs/SHARE_KIT.md"
+        - "docs/LAUNCH_COPY.md"
+        - "docs/PROJECT_DISTRIBUTION_TRACKER.md"
+        - "docs/CHANGELOG.md"
+        - "reports/AGC_OSS_NAMING_03_R2_HISTORICAL_STATUS_CLARIFICATION_REPORT.md"
+        - "reports/AGC_OSS_GROWTH_04_CONTROLLED_DISTRIBUTION_REPORT.md"
+        - "tests/unit/test_public_adoption_assets.py"
+      exclude:
+        - "governance/"
+        - "schemas/"
+        - "scripts/"
+        - "Build Week files"
+        - "repository slug and origin remote"
+    verification:
+      planned:
+        automated_tests:
+          - "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_public_adoption_assets"
+          - "python3 scripts/run_governance_ci.py"
+        repeatable_smoke:
+          - "git diff --check"
+        manual_one_off_checks:
+          - "Target contribution-rule review"
+      completed:
+        automated_tests:
+          - "PASS: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_public_adoption_assets (7 tests)"
+          - "PASS: PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_governance_ci.py"
+        repeatable_smoke:
+          - "PASS: git diff --check"
+          - "PASS: changed-path review confirms Build Week, runtime, schema, CLI, and state-machine paths are absent"
+        manual_one_off_checks:
+          - "PASS: public contribution-rule review completed for eight candidates"
+    notes: "Self-repository PR #6 was opened after passing local and remote checks. No third-party promotional PR is authorized or created by this task."

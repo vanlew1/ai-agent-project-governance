@@ -2,7 +2,7 @@
 
 ## Status
 
-`PARTIAL` — the verified local release candidate is committed; remote PR, merge, tag, GitHub Release, metadata update, and external distribution have not yet been performed.
+`COMPLETE` — the verified release was merged, tagged, released, and published through GitHub; repository metadata was read back, and one relevant awesome-list submission PR was opened. X, Reddit, and Hacker News were not posted because the available browser session could not initialize safely.
 
 ## Scope and boundary result
 
@@ -61,11 +61,14 @@ Result: `PASS (8/8 gates)`; full suite passed. `git diff --check` passed before 
 - Task branch: `codex/superpowers-positioning-release`.
 - Local implementation commit: `b465a45ef3304646ec781660b033f583bae9bb82`.
 - Remote state was read successfully; `origin/main` matched the baseline at the time checked.
-- Push, PR, merge, tag, GitHub Release, repository metadata update, and external distribution: pending at this report checkpoint.
+- Release PR: [#3](https://github.com/vanlew1/ai-agent-project-governance/pull/3), merged after `governance` and `windows-smoke` both passed.
+- Merge commit / current released `main`: `74d90e68339daba7011d784a6ee0affa72611d25`.
+- Tag: [`v1.1.0`](https://github.com/vanlew1/ai-agent-project-governance/releases/tag/v1.1.0).
+- GitHub Release: [v1.1.0](https://github.com/vanlew1/ai-agent-project-governance/releases/tag/v1.1.0).
+- Repository description and homepage were updated and read back. GitHub had 11 existing Topics and a 20-topic cap; 9 positioning Topics were added without deleting existing metadata.
+- Awesome-list submission: [brandonhimpfen/awesome-ai-coding-agents#39](https://github.com/brandonhimpfen/awesome-ai-coding-agents/pull/39).
 
 ## Remaining external steps
 
-1. Push the task branch and create a PR without bypassing required checks.
-2. Verify remote CI; merge only if repository policy permits.
-3. Create the `v1.1.0` tag and GitHub Release after merge.
-4. Apply reviewed repository metadata, then publish only the prewritten, fact-checked external copy where the authenticated account and platform rules allow it.
+- X, Reddit, and Hacker News posts were not attempted because browser control failed before session discovery with a local `sandboxCwd` path error. No alternative automation, login bypass, credential handling, or unreviewed posting was attempted.
+- The awesome-list PR is submitted and awaits the external maintainer's decision; it was not represented as accepted.

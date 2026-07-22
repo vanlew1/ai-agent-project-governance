@@ -1,6 +1,8 @@
-# Agent Governance Runtime
+# Coding Agent Governance
 
-> 面向 AI 编码 Agent 工作流的确定性范围控制、证据验证与任务收口层。
+> 面向 AI 编码 Agent 的治理层：让变更保持在授权范围内、证据可追溯、过程可审查，并显式收口。
+
+仓库 slug 从 `ai-agent-project-governance` 的迁移仍待完成。
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
