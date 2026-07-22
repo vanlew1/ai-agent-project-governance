@@ -25,7 +25,7 @@ python3 scripts/agent_adopt.py confirmation-candidate --plan /tmp/adoption-plan.
 
 `--output` is optional and must point outside the target project. A formal downstream flow requires `--scope-file`; private `build_plan(...)` calls and scope-less plans cannot masquerade as public CLI generation. A confirmation candidate remains unapproved unless the Owner separately invokes the explicit confirmation command with `--confirm-owner`. A detected Adapter, Preset recommendation, scope candidate, or test candidate is never authorization by itself.
 
-Note: Artifacts generated before `v1.3.0` do not carry the Git-HEAD-blob provenance contract and are no longer supported. Re-run `dry-run` to generate a fresh, compatible draft bundle.
+Note: Artifacts generated before `v1.2.0` do not carry the Git-HEAD-blob provenance contract and are no longer supported. Re-run `dry-run` to generate a fresh, compatible draft bundle.
 
 1. Make a normal local backup or branch.
 2. Run `python <runtime-root>/scripts/agent_detect_adapter.py --root . detect`.

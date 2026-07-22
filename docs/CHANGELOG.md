@@ -2,15 +2,6 @@
 
 ## Unreleased
 
-### CASE-001 minimum unblock remediation (1.3.0 candidate)
-
-- Added formal `--scope-file` flow with one canonical scope contract enforced at planning, confirmation, export, Runtime compilation, approval, and installation boundaries.
-- Added truthful Toolchain Provenance Binding v2 for public CLI generation. Its generator-source digest binds clean Git `HEAD` blobs for fixed inputs, rejects modified or staged generator source, and is stable across LF/CRLF checkouts; it binds repository `VERSION`, command contract, formal-scope bytes, target branch/HEAD, framework commit, plan payload, and receipt digest. It is not a keyed anti-forgery signature.
-- Added pre-write `INSTALL_WRITESET.json`, `PRE_INSTALL_HASHES.json`, and `ROLLBACK_MANIFEST.json` artifacts shared by compiler, approval, installer, receipt, and manual rollback assessment.
-- Added byte-stable UTF-8/LF exclusive and atomic writers for formal adoption artifacts, plus raw and normalized-text identities for reviewed human text.
-- Added public unapproved confirmation/approval candidates; Preview generation leaves Owner, install, and activation approval false.
-- Removed the ad hoc CASE-001 regeneration script that bypassed public CLI authority boundaries.
-
 ### Added
 
 - Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.
@@ -29,13 +20,38 @@
 
 - 鏇存柊 `agent_rules/00_rule_router.md` 鍜?`AGENTS.md`锛屽皢楂樻垚鏈€佽仈缃戙€佹寮忓啓鍏ャ€佷笉鍙€嗘搷浣滅瓑浠诲姟鐨勪汉宸ュ墠缃棬鍓嶇Щ鍒版墿灞曡鍙栧拰鏂藉伐涔嬪墠銆?
 
-- Prepared the public product presentation as Coding Agent Governance; the current repository slug remains `ai-agent-project-governance` until an authenticated GitHub rename can complete.
-- Added controlled distribution copy, a target-review matrix, and a tracking baseline for Coding Agent Governance. No runtime, schema, CLI, state-machine, repository-slug, or third-party submission change was made.
+### Fixed
+
+- Added P3 allowlisted verification, closure, isolated CLI acceptance, and compact reporting; adapters, CI, and multi-agent remain disabled.
+
+## [1.2.0] - 2026-07-22
+
+### Added
+
+- Added formal project-defined adoption scopes through `--scope-file`, enforced across planning, confirmation, export, Runtime compilation, approval, and installation.
+- Added one canonical install writeset plus pre-install hashes and a manual rollback manifest, all generated before target writes.
+- Added explicit, authorization-neutral confirmation and installation approval candidates. Preview generation does not grant installation or activation authority.
+
+### Changed
+
+- Upgraded Toolchain Provenance Binding to v2. Generator identity now binds clean Git `HEAD` blobs, rejects modified or staged generator inputs, and remains deterministic across LF/CRLF checkouts.
+- Made formal artifact writing byte-stable through UTF-8/LF normalization, exclusive creation, and atomic replacement where applicable.
+- Replaced the fixed release-test timeout with a bounded, auditable 600-second default configurable from 60 through 3600 seconds.
+- Preserved the public Coding Agent Governance presentation, controlled distribution materials, and target-review tracking added on `main` after v1.1.0.
 
 ### Fixed
 
-- Changed the canonical release tests timeout from a fixed 300-second limit to a fail-closed, auditable 600-second default hang guard configurable from 60 through 3600 seconds.
-- Added P3 allowlisted verification, closure, isolated CLI acceptance, and compact reporting; adapters, CI, and multi-agent remain disabled.
+- Kept generated draft summaries authorization-neutral until an Owner explicitly confirms the unchanged artifacts.
+- Made the provenance LF/CRLF fixture self-contained so Windows and Linux validate the same Git-blob contract.
+
+### Performance
+
+- Cached immutable Git `HEAD` blob digests and batched Git validation/blob reads without weakening dirty or staged fail-closed checks.
+
+### Security
+
+- Artifacts created before v1.2.0 do not contain provenance v2 fields and are rejected by the formal downstream flow. Regenerate the adoption Preview instead of editing an old receipt.
+- Installation and activation remain separate, explicit Owner decisions. A Preview is never installation or activation authorization.
 
 ## [1.1.0] - 2026-07-16
 
